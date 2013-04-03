@@ -137,14 +137,14 @@ void Driver::Forward(int steps) {
     float err = 0;
     if(rs > Right_Open_Threshold) {
       //there is a wall to the right!
-      err -=  (rs-Right_Open_Threshold)*(1.0/(rs)-1.0/right_sensor.middle_distance)*30;//*310;
+      err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*310;
 
 
     }
         
     if(ls> Left_Open_Threshold) {
       //there is a wall to the left!
-      //err +=  (1.0/ls-1.0/left_sensor.middle_distance)*310;
+      err +=  (1.0/ls-1.0/left_sensor.middle_distance)*310;
 
     }
     
