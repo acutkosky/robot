@@ -33,23 +33,7 @@ float DistanceSensor::read(void) {
   return (analogRead(pin)+analogRead(pin)+analogRead(pin)+analogRead(pin))/4.0;
 }
 
-/*
-Driver::Driver() {
-  int rs_pin =1;
-  int ls_pin =2;
-  int fs_pin =3;
-  int rd_pin =2;
-  int rm_pin =3;
-  int ld_pin =4;
-  int lm_pin =5;
-  right_sensor = DistanceSensor(rs_pin);
-  left_sensor = DistanceSensor(ls_pin);
-  forward_sensor = DistanceSensor(fs_pin);
-  
-  right_stepper = AccelStepper(1,rd_pin,rm_pin);
-  left_stepper = AccelStepper(1,ld_pin,lm_pin);
-}
-*/
+
 Driver::Driver(int rs_pin,int ls_pin, int fs_pin, int rd_pin,
 	       int rm_pin, int ld_pin, int lm_pin) {
   right_sensor = DistanceSensor(rs_pin);
@@ -126,11 +110,10 @@ void Driver::Forward(int steps) {
   
   float rs,ls;
 
-  //right_stepper.move(-steps);
-  //left_stepper.move(steps);
+
   right_speed = left_speed = target_speed;
-  right_stepper.setMaxSpeed(1000);//target_speed);
-  left_stepper.setMaxSpeed(10000);//target_speed);
+  right_stepper.setMaxSpeed(1000);
+  left_stepper.setMaxSpeed(10000);
   right_stepper.setSpeed(-target_speed);
   left_stepper.setSpeed(target_speed);
 
@@ -146,39 +129,35 @@ void Driver::Forward(int steps) {
     ls = left_sensor.read();
     float err = 0;
     if(rs > Right_Open_Threshold) {
-      // float err = (rs-ls)/100;
-      //right_speed -= err;
-      //left_speed += err;
-      //right_stepper.setSpeed(right_speed);
-      //left_stepper.setSpeed(left_speed);
-      //there is a wall to the right!
+
       err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*440;
-      //Serial.println((rs-right_sensor.middle_distance)/100.0);
+
 
     }
     
     if(ls> Left_Open_Threshold) {
       //there is a wall to the left!
       err +=  (1.0/ls-1.0/left_sensor.middle_distance)*440;
-      //left_speed += (ls-left_sensor.middle_distance)/1000000.0;
 
     }
     
     unsigned long t= micros();
-    
+
+    /* we are taking the derivative without time because it worked better*/
     float D = (err-last_err);
     last_err = err;
     last_time = t;
     right_speed+=err;
     left_speed -=err;
     float turn = right_speed-left_speed;
+
+    /*random hard coded constants*/
     right_speed = right_speed-D/350.0-turn/350;
     left_speed = left_speed+D/350.0+turn/350;
 
-      right_stepper.setSpeed(-right_speed);
-      left_stepper.setSpeed(left_speed);
-    //printnum("actual speed: ",right_stepper.speed());
-    //printnum("setspeed: ",right_speed);
+    right_stepper.setSpeed(-right_speed);
+    left_stepper.setSpeed(left_speed);
+
     right_stepper.runSpeed();
     left_stepper.runSpeed();
   }
