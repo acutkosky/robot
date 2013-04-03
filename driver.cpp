@@ -130,14 +130,14 @@ void Driver::Forward(int steps) {
     float err = 0;
     if(rs > Right_Open_Threshold) {
 
-      err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*440;
+      err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*310;
 
 
     }
     
     if(ls> Left_Open_Threshold) {
       //there is a wall to the left!
-      err +=  (1.0/ls-1.0/left_sensor.middle_distance)*440;
+      err +=  (1.0/ls-1.0/left_sensor.middle_distance)*310;
 
     }
     
@@ -152,8 +152,8 @@ void Driver::Forward(int steps) {
     float turn = right_speed-left_speed;
 
     /*random hard coded constants*/
-    right_speed = right_speed-D/350.0-turn/350;
-    left_speed = left_speed+D/350.0+turn/350;
+    right_speed = right_speed-D/25.0-turn/125;
+    left_speed = left_speed+D/25.0+turn/125;
 
     right_stepper.setSpeed(-right_speed);
     left_stepper.setSpeed(left_speed);
