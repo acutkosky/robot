@@ -159,8 +159,8 @@ void Driver::Forward(int steps) {
     float turn = right_speed-left_speed;
 
     /*random hard coded constants*/
-    right_speed = right_speed-D/25.0-turn/125;
-    left_speed = left_speed+D/25.0+turn/125;
+    right_speed = right_speed-D/25.0-turn/115;
+    left_speed = left_speed+D/25.0+turn/115;
 
     right_stepper.setSpeed(-right_speed);
     left_stepper.setSpeed(left_speed);
