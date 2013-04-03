@@ -152,7 +152,7 @@ void Driver::Forward(int steps) {
       //right_stepper.setSpeed(right_speed);
       //left_stepper.setSpeed(left_speed);
       //there is a wall to the right!
-      err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*430;
+      err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*440;
       //Serial.println((rs-right_sensor.middle_distance)/100.0);
 
     }
@@ -166,14 +166,14 @@ void Driver::Forward(int steps) {
     
     unsigned long t= micros();
     
-    float D = (err-last_err)/(t-last_time);
+    float D = (err-last_err);
     last_err = err;
     last_time = t;
     right_speed+=err;
     left_speed -=err;
     float turn = right_speed-left_speed;
-    right_speed = right_speed-D/310.0-turn/370;
-    left_speed = left_speed+D/310.0+turn/370;
+    right_speed = right_speed-D/350.0-turn/350;
+    left_speed = left_speed+D/350.0+turn/350;
 
       right_stepper.setSpeed(-right_speed);
       left_stepper.setSpeed(left_speed);
