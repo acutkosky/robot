@@ -109,14 +109,15 @@ void Driver::Forward(int steps) {
   left_stepper.setCurrentPosition(0);
   
   float rs,ls;
+  float accel = 1.0;
+  right_speed = left_speed = 0;
 
-
-  right_speed = left_speed = target_speed;
+  //  right_speed = left_speed = target_speed;
   right_stepper.setMaxSpeed(1000);
   left_stepper.setMaxSpeed(10000);
-  right_stepper.setSpeed(-target_speed);
-  left_stepper.setSpeed(target_speed);
-
+  right_stepper.setSpeed(-right_speed);
+  left_stepper.setSpeed(left_speed);
+  
 
   while(-right_stepper.currentPosition()+left_stepper.currentPosition()<2*steps) {
     /* three cases:
@@ -124,20 +125,26 @@ void Driver::Forward(int steps) {
      * in a T junction (just use on sensor)
      * in a crossroads (just trust to luck)
      */
+    
+    if(right_speed+left_speed <2*target_speed-accel) {
+      right_speed+=accel;
+      left_speed+=accel;
+    }
+    
 
     rs = right_sensor.read();
     ls = left_sensor.read();
     float err = 0;
     if(rs > Right_Open_Threshold) {
-
-      err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*310;
+      //there is a wall to the right!
+      err -=  (rs-Right_Open_Threshold)*(1.0/(rs)-1.0/right_sensor.middle_distance)*30;//*310;
 
 
     }
-    
+        
     if(ls> Left_Open_Threshold) {
       //there is a wall to the left!
-      err +=  (1.0/ls-1.0/left_sensor.middle_distance)*310;
+      //err +=  (1.0/ls-1.0/left_sensor.middle_distance)*310;
 
     }
     
