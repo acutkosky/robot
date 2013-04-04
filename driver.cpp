@@ -1,5 +1,5 @@
 #include "driver.h"
-
+#define SIGN(x) (x<0?-1:1)
 /* constructor for DistanceSensor class.
  * takes an analog pin number and immediately calibrates
  */
@@ -30,7 +30,12 @@ DistanceSensor::DistanceSensor() {
 
 /* reads the voltage from a distance sensor */
 float DistanceSensor::read(void) {
-  return (analogRead(pin)+analogRead(pin)+analogRead(pin)+analogRead(pin))/4.0;
+  float ret =0;
+  for(int i=0;i<6;i++) {
+    ret += analogRead(pin);
+  }
+  return ret/6.0;
+  //  return (analogRead(pin)+analogRead(pin)+analogRead(pin)+analogRead(pin))/4.0;
 }
 
 
@@ -55,11 +60,11 @@ void Driver::setup(void) {
   right_stepper.stop();
   left_stepper.stop();
   right_stepper.setSpeed(-1000.0);
-  right_stepper.setAcceleration(1000.0);
-  
+  right_stepper.setAcceleration(500.0);
+  right_stepper.setMaxSpeed(500.0);
   left_stepper.setSpeed(1000.0);
-  left_stepper.setAcceleration(1000.0);
-
+  left_stepper.setAcceleration(500.0);
+  left_stepper.setMaxSpeed(500.0);
   last_err = 0.0;
   last_time = micros();
 }
@@ -97,8 +102,11 @@ void printnum(const char* str,float num) {
  */
 
 
+
 void Driver::Turn(int steps) {
   SetTurn(right_stepper,left_stepper,steps);
+  //right_stepper.setSpeed(target_speed*SIGN(steps));
+  //left_stepper.setSpeed(target_speed*SIGN(steps));
   RunToTarget(right_stepper,left_stepper);
 }
 
@@ -114,12 +122,12 @@ void Driver::Forward(int steps) {
 
   //  right_speed = left_speed = target_speed;
   right_stepper.setMaxSpeed(1000);
-  left_stepper.setMaxSpeed(10000);
+  left_stepper.setMaxSpeed(1000);
   right_stepper.setSpeed(-right_speed);
   left_stepper.setSpeed(left_speed);
   
 
-  while(-right_stepper.currentPosition()+left_stepper.currentPosition()<2*steps) {
+  while(-right_stepper.currentPosition()+left_stepper.currentPosition()<2*steps && forward_sensor.read() < Forward_Open_Threshold) {
     /* three cases:
      * we are in a hallway (easiest, can use both sensors)
      * in a T junction (just use on sensor)
@@ -137,30 +145,33 @@ void Driver::Forward(int steps) {
     float err = 0;
     if(rs > Right_Open_Threshold) {
       //there is a wall to the right!
-      err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*310;
+      err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*1800;
 
 
     }
         
     if(ls> Left_Open_Threshold) {
       //there is a wall to the left!
-      err +=  (1.0/ls-1.0/left_sensor.middle_distance)*310;
+      //err +=  (1.0/ls-1.0/left_sensor.middle_distance)*1600;
 
     }
     
     unsigned long t= micros();
 
     /* we are taking the derivative without time because it worked better*/
+
+    last_time = t;
+    float turn = right_speed-left_speed;
+    err -= turn/100;
     float D = (err-last_err);
     last_err = err;
-    last_time = t;
+
     right_speed+=err;
     left_speed -=err;
-    float turn = right_speed-left_speed;
 
     /*random hard coded constants*/
-    right_speed = right_speed-D/25.0-turn/115;
-    left_speed = left_speed+D/25.0+turn/115;
+    right_speed = right_speed-D/400.0;//-turn/295;
+    left_speed = left_speed+D/400.0;//+turn/295;
 
     right_stepper.setSpeed(-right_speed);
     left_stepper.setSpeed(left_speed);

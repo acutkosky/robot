@@ -5,8 +5,9 @@
 #define DRIVER_h
 
 /*random hard coded constants*/
-#define Right_Open_Threshold 250.0
-#define Left_Open_Threshold 320.0
+#define Right_Open_Threshold 200.0
+#define Left_Open_Threshold 200.0
+#define Forward_Open_Threshold 610.0
 
 struct DistanceSensor {
   int pin;
@@ -55,6 +56,11 @@ class Driver {
   void Forward(int);
 
   void SetTargetSpeed(float);
+
+  /*is there a wall to the sides*/
+  int forward_wall(void);
+  int right_wall(void);
+  int left_wall(void);
 };
 void SetTurn(AccelStepper&,AccelStepper&,int);
 
