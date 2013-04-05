@@ -8,8 +8,8 @@
 
 #define GRID_SIZE 16
 #define NORTH (1<<7)
-#define SOUTH (1<<6)
-#define EAST (1<<5)
+#define EAST (1<<6)
+#define SOUTH (1<<5)
 #define WEST (1<<4)
 
 #define VISITS_MASK (15)
@@ -50,6 +50,14 @@ class Maze {
 
 
   /*
+   *Visit:
+   *"Visits" the specified cell given observed walls -
+   *increment the visit count
+   *if observed walls are not equal to previously guessed walls, update walls
+   */
+  void Visit(char x, char y,char Walls);
+
+  /*
    *Add_Walls:
    *adds walls into the maze
    *increments the visits count for the current cell
@@ -69,6 +77,7 @@ class Maze {
   /*
    *Get_Direction:
    *returns the direction of the fastest path to the center from the given cell coordinates
+   *returns 0 if the current coordinates are already at the goal
    */
   char Get_Direction(char x, char y);
 

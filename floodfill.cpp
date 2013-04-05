@@ -74,6 +74,10 @@ char Maze::Get_Direction(char x, char y) {
   char best_visits = 15;
   char best_direction;
 
+  /*check if we've already solved the maze*/
+  if(target_distance == 1) 
+    return 0;
+
   if(!NORTH_WALL(walls)) {
     if(grid[x][y-1].distance == target_distance && VISITS(grid[x][y-1].walls_visits) <= best_visits) {
       best_direction = NORTH;
@@ -108,9 +112,7 @@ char Maze::Get_Direction(char x, char y) {
   return best_direction;
 }
 
-
-void Maze::Add_Walls(char x, char y, char wall) {
-  ADD_WALL(grid[x][y].walls_visits,wall);
+void Maze::Visit(char x,char y, char walls) {
 
   /*
    *increment visit count.
@@ -118,6 +120,15 @@ void Maze::Add_Walls(char x, char y, char wall) {
    */
   if(VISITS(grid[x][y].walls_visits)<15)
     grid[x][y].walls_visits++;
+
+  if(WALLS(grid[x][y].walls)!=walls)
+    Add_Walls(x,y,walls);
+}
+  
+
+void Maze::Add_Walls(char x, char y, char wall) {
+  ADD_WALL(grid[x][y].walls_visits,wall);
+
 
 
   /*add in the other sides of the walls*/
