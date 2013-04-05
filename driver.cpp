@@ -1,5 +1,7 @@
 #include "driver.h"
 #define SIGN(x) (x<0?-1:1)
+#define k_p 50
+
 /* constructor for DistanceSensor class.
  * takes an analog pin number and immediately calibrates
  */
@@ -118,14 +120,14 @@ void Driver::Forward(int steps) {
   
   float rs,ls;
   float accel = 1.0;
-  right_speed = left_speed = 0;
+  right_speed = left_speed = target_speed;
 
   //  right_speed = left_speed = target_speed;
   right_stepper.setMaxSpeed(1000);
   left_stepper.setMaxSpeed(1000);
   right_stepper.setSpeed(-right_speed);
   left_stepper.setSpeed(left_speed);
-  
+  float meta_target_speed = 0.0;
 
   while(-right_stepper.currentPosition()+left_stepper.currentPosition()<2*steps && forward_sensor.read() < Forward_Open_Threshold) {
     /* three cases:
@@ -134,11 +136,12 @@ void Driver::Forward(int steps) {
      * in a crossroads (just trust to luck)
      */
     
-    if(right_speed+left_speed <2*target_speed-accel) {
-      right_speed+=accel;
-      left_speed+=accel;
+    
+    if(meta_target_speed <target_speed-accel) {
+       meta_target_speed += accel;
     }
     
+    right_speed = left_speed = meta_target_speed;
 
     rs = right_sensor.read();
     ls = left_sensor.read();
@@ -156,27 +159,27 @@ void Driver::Forward(int steps) {
 
     }
     
-    unsigned long t= micros();
+    //unsigned long t= micros();
 
     /* we are taking the derivative without time because it worked better*/
 
-    last_time = t;
-    float turn = right_speed-left_speed;
-    err -= turn/80;
-    err = err*SIGN(err)>2.5?2.5*SIGN(err):err;
+    //last_time = t;
+    //float turn = right_speed-left_speed;
+    //err -= turn/80;
+    err = err*SIGN(err)>1.25?1.25*SIGN(err):err;
 
     float D = (err-last_err);
     last_err = err;
 
-    right_speed+=err;
-    left_speed -=err;
+    right_speed+=k_p*err-D*0.1;
+    left_speed -=k_p*err+D*0.1;
 
     //right_speed -= 2*err*SIGN(err);
     //left_speed -= 2*err*SIGN(err);
 
     /*random hard coded constants*/
-    right_speed = right_speed-D/400.0;//-turn/295;
-    left_speed = left_speed+D/400.0;//+turn/295;
+    //right_speed = right_speed-D/400.0;//-turn/295;
+    //left_speed = left_speed+D/400.0;//+turn/295;
     
     right_stepper.setSpeed(-right_speed);
     left_stepper.setSpeed(left_speed);
