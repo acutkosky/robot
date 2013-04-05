@@ -1,0 +1,68 @@
+
+#include "robot.h"
+
+Robot::Robot(void) {
+  orientation = EAST;
+  x = y = 0;
+}
+
+void Robot::Advance(int squares) {
+  driver.Forward(squares*Square_Length);
+}
+
+void Robot::Turn(int degrees) {
+  driver.Turn(degrees*STEPS_PER_DEGREE);
+}
+
+void Robot::Go(int squares,char direction) {
+
+  if(orientation == direction) {
+    Advance(squares);
+    return;
+  }
+
+  int start,end;
+
+  switch(orientation) {
+  case NORTH:
+    start = 0;
+    break;
+  case EAST:
+    start = 90;
+    break;
+  case SOUTH:
+    start = 180;
+    break;
+  case WEST:
+    start = 270;
+  }
+
+  switch(direction) {
+  case NORTH:
+    end = 0;
+    break;
+  case EAST:
+    end = 90;
+    break;
+  case SOUTH:
+    end = 180;
+    break;
+  case WEST:
+    end = 270;
+    break;
+  }
+
+  int turn = end-start;
+
+  if(turn == 270)
+    turn = -90;
+
+  if(turn == -270)
+    turn = 90;
+
+  Turn(turn);
+
+  orientation = direction;
+
+  Advance(squares);
+}

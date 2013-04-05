@@ -1,0 +1,51 @@
+
+/*
+ *robot.h
+ *interfaces the robot with the driver and the maze systems
+ */
+
+#include "driver.h"
+#include "floodfill.h"
+
+#define SQUARE_LENGTH 100 //length of a square in steps of the motors.
+
+class Robot {
+
+  Driver driver;
+  Maze maze;
+  char orientation;
+  char x;
+  char y;
+
+
+  /*
+   *Advance:
+   *tells the robot to go a specified number of grid squares forward
+   */
+  void Advance(int squares);
+
+  /*
+   *Turn:
+   *tells the robot to turn a specified number of degrees
+   */
+  void Turn(int degrees);
+
+  /*
+   *Go:
+   *tells the robot to move a specified number of squares in the specified direction
+   *calls advance and turn as appropriate.
+   */
+  void Go(int squares,char direction);
+
+  /*
+   *Walls:
+   *returns the walls visible from the current cell in an ORed char.
+   */
+  char Walls(void);
+
+
+  /*
+   *Maze_Step:
+   *Moves the robot in the best maze-solving direction and updates the maze data.
+   */
+
