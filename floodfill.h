@@ -5,6 +5,10 @@
  *This is because I'm afraid we'll run out of memory.
  */
 
+#pragma once
+
+#define ABS(A) (A<0?-A:A)
+#define MIN(A,B) (A<B?A:B)
 
 #define GRID_SIZE 16
 #define NORTH (1<<7)
@@ -93,4 +97,4 @@ class Maze {
 
 
 
-}
+};

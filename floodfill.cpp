@@ -14,13 +14,13 @@ Maze::Maze(void) {
   }
 
   for(int i=0;i<GRID_SIZE;i++) {
-    ADD_WALL(grid[i,0].walls_visits,NORTH);
-    ADD_WALL(grid[i,GRID_SIZE-1].walls_visits,SOUTH);
+    ADD_WALL((grid[i][0].walls_visits),NORTH);
+    ADD_WALL((grid[i][GRID_SIZE-1].walls_visits),SOUTH);
   }
 
   for(int i=0;i<GRID_SIZE;i++) {
-    ADD_WALL(grid[0,i].walls_visits,EAST);
-    ADD_WALL(grid[GRID_SIZE-1,i].walls_visits,WEST);
+    ADD_WALL((grid[0][i].walls_visits),EAST);
+    ADD_WALL((grid[GRID_SIZE-1][i].walls_visits),WEST);
   }
 
 }
@@ -31,7 +31,7 @@ char Maze::Update_Distance(char x, char y) {
   char old_distance = grid[x][y].distance;
   
   /*are we at the center yet?*/
-  if(grid[x][y].old_distance == 0) {
+  if(old_distance == 0) {
     return 0;
   }
   
@@ -63,7 +63,7 @@ char Maze::Update_Distance(char x, char y) {
   }
 
   grid[x][y].distance = best_distance+1;
-  return (distance+1 == old_distance);
+  return (best_distance+1 == old_distance);
 
 }
 
@@ -121,7 +121,7 @@ void Maze::Visit(char x,char y, char walls) {
   if(VISITS(grid[x][y].walls_visits)<15)
     grid[x][y].walls_visits++;
 
-  if(WALLS(grid[x][y].walls)!=walls)
+  if(WALLS(grid[x][y].walls_visits)!=walls)
     Add_Walls(x,y,walls);
 }
   
