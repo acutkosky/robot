@@ -14,9 +14,9 @@ class Robot {
  public:
   Driver driver;
   Maze maze;
-  char orientation;
-  char x;
-  char y;
+  unsigned char orientation;
+  unsigned char x;
+  unsigned char y;
 
 
 
@@ -39,13 +39,13 @@ class Robot {
    *calls advance and turn as appropriate.
    *sets orientation.
    */
-  void Go(int squares,char direction);
+  void Go(int squares,unsigned char direction);
 
   /*
    *Walls:
-   *returns the walls visible from the current cell in an ORed char.
+   *returns the walls visible from the current cell in an ORed unsigned char.
    */
-  char Walls(void);
+  unsigned char Walls(void);
 
   /*
    *Update_Maze:
@@ -69,6 +69,9 @@ class Robot {
    *blocks until the maze is solved
    */
   void Solve(void);
+
+  unsigned char Read_Walls(void);
+  
 
   /*
    *constructor

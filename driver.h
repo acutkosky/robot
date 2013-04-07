@@ -5,9 +5,9 @@
 #define DRIVER_h
 
 /*random hard coded constants*/
-#define RIGHT_OPEN_THRESHOLD 120.0
-#define LEFT_OPEN_THRESHOLD 180.0
-#define FORWARD_OPEN_THRESHOLD 250.0
+#define RIGHT_OPEN_THRESHOLD 180.0
+#define LEFT_OPEN_THRESHOLD 230.0
+#define FORWARD_OPEN_THRESHOLD 260.0
 
 struct DistanceSensor {
   int pin;

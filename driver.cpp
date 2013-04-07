@@ -71,11 +71,11 @@ void Driver::setup(void) {
   right_stepper.stop();
   left_stepper.stop();
   right_stepper.setSpeed(-1000.0);
-  right_stepper.setAcceleration(500.0);
-  right_stepper.setMaxSpeed(500.0);
+  right_stepper.setAcceleration(1000.0);
+  right_stepper.setMaxSpeed(1000.0);
   left_stepper.setSpeed(1000.0);
-  left_stepper.setAcceleration(500.0);
-  left_stepper.setMaxSpeed(500.0);
+  left_stepper.setAcceleration(1000.0);
+  left_stepper.setMaxSpeed(1000.0);
   last_err = 0.0;
   last_time = micros();
 
@@ -184,7 +184,7 @@ float Driver::Forward(int steps) {
     //last_time = t;
     //float turn = right_speed-left_speed;
     //err -= turn/80;
-    err = err*SIGN(err)>1.2?1.2*SIGN(err):err;
+    err = err*SIGN(err)>1.25?1.25*SIGN(err):err;
 
     float D = (err-last_err);
     last_err = err;

@@ -20,7 +20,7 @@ Maze::Maze(void) {
   grid[(GRID_SIZE-1)/2][(GRID_SIZE-1)/2].distance = 0;
   grid[(GRID_SIZE-1)/2][(GRID_SIZE)/2].distance = 0;
   /*
-      char xdist,ydist;
+      unsigned char xdist,ydist;
       if(x>=GRID_SIZE/2) {
 	xdist = x-GRID_SIZE/2;
       } else {
@@ -50,7 +50,7 @@ Maze::Maze(void) {
 
 }
 
-void Maze::Reset_Goal(char x, char y) {
+void Maze::Reset_Goal(unsigned char x, unsigned char y) {
   for(int i=0;i<GRID_SIZE;i++) {
     for(int j=0;j<GRID_SIZE;j++) {
       grid[i][j].distance = 127;
@@ -62,18 +62,18 @@ void Maze::Reset_Goal(char x, char y) {
   Flood_Fill(0,0);
 }
 
-char Maze::Update_Distance(char x, char y) {
+unsigned char Maze::Update_Distance(unsigned char x, unsigned char y) {
   
   
-  char old_distance = grid[x][y].distance;
+  unsigned char old_distance = grid[x][y].distance;
   
   /*are we at the center yet?*/
   if(old_distance == 0) {
     return 1;
   }
   
-  char best_distance = 255;
-  char walls = grid[x][y].walls_visits;
+  unsigned char best_distance = 127;
+  unsigned char walls = grid[x][y].walls_visits;
   //  cout<<"x: "<<(int)x<<"y: "<<(int)y<<"\n";  
   if(!NORTH_WALL(walls)) {
     if((uint)best_distance > (uint)grid[x][y-1].distance)
@@ -111,15 +111,15 @@ char Maze::Update_Distance(char x, char y) {
 
 }
 
-char Maze::Get_Direction(char x, char y) {
-  char walls = grid[x][y].walls_visits;
+unsigned char Maze::Get_Direction(unsigned char x, unsigned char y) {
+  unsigned char walls = grid[x][y].walls_visits;
 
-  char target_distance = grid[x][y].distance-1;
-  char best_visits = 15;
-  char best_direction;
+  unsigned char target_distance = grid[x][y].distance-1;
+  unsigned char best_visits = 15;
+  unsigned char best_direction;
 
   /*check if we've already solved the maze*/
-  if(target_distance == -1) 
+  if(grid[x][y].distance == 0) 
     return 0;
   //cout<<"target distance: "<<(int)target_distance<<"\n";
   if(!NORTH_WALL(walls)) {
@@ -161,7 +161,7 @@ char Maze::Get_Direction(char x, char y) {
   return best_direction;
 }
 
-void Maze::Visit(char x,char y, char walls) {
+void Maze::Visit(unsigned char x,unsigned char y, unsigned char walls) {
 
   /*
    *increment visit count.
@@ -175,7 +175,7 @@ void Maze::Visit(char x,char y, char walls) {
 }
   
 
-void Maze::Add_Walls(char x, char y, char wall) {
+void Maze::Add_Walls(unsigned char x, unsigned char y, unsigned char wall) {
   ADD_WALL(grid[x][y].walls_visits,wall);
 
 
@@ -196,12 +196,12 @@ void Maze::Add_Walls(char x, char y, char wall) {
 }
 
 
-char Maze::Flood_Fill(char x, char y) {
-  char stable = 0;
+unsigned char Maze::Flood_Fill(unsigned char x, unsigned char y) {
+  unsigned char stable = 0;
   while(!stable) {
     stable = 1;
-    for(char x=0;x<GRID_SIZE;x++) {
-      for(char y=0;y<GRID_SIZE;y++) {
+    for(unsigned char x=0;x<GRID_SIZE;x++) {
+      for(unsigned char y=0;y<GRID_SIZE;y++) {
 	if(Update_Distance(x,y) != 1) //it was changed
 	  stable = 0;
       }

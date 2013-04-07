@@ -40,7 +40,7 @@ void Robot::Turn(int degrees) {
   driver.Turn(degrees*STEPS_PER_DEGREE);
 }
 
-void Robot::Go(int squares,char direction) {
+void Robot::Go(int squares,unsigned char direction) {
 
   if(orientation == direction) {
     Advance(squares);
@@ -94,8 +94,8 @@ void Robot::Go(int squares,char direction) {
 }
 
 
-char Robot::Walls(void) {
-  char walls = 0;
+unsigned char Robot::Read_Walls(void) {
+  unsigned char walls = 0;
   float fs = driver.forward_sensor.read(10);
   float rs = driver.right_sensor.read(10);
   float ls = driver.left_sensor.read(10);
@@ -116,7 +116,7 @@ char Robot::Walls(void) {
     if(orientation == WEST) {
       ADD_WALL(walls,NORTH);
     } else {
-      ADD_WALL(walls,orientation>>1);
+      ADD_WALL(walls,(orientation>>1));
     }
   }
 
@@ -128,16 +128,39 @@ char Robot::Walls(void) {
     if(orientation == NORTH) {
       ADD_WALL(walls,WEST);
     } else {
-      ADD_WALL(walls,orientation<<1);
+      ADD_WALL(walls,(orientation<<1));
     }
   }
 
   return walls;
 }
 
+unsigned char Robot::Walls(void) {
+
+  unsigned char walls = Read_Walls();
+  if(VISITS(maze.grid[x][y].walls_visits)!=0) {
+    if(walls != WALLS(maze.grid[x][y].walls_visits)) {
+      //something changed? better check again...
+      Serial.println("oh no! inconsistent wall readings...");
+      walls = Read_Walls();
+      if(walls == WALLS(maze.grid[x][y].walls_visits)) {
+	Serial.println("inconsistencies resolved to old reading");
+      } else {
+	Serial.println("old reading discarded for a new one");
+      }
+    } else {
+      Serial.println("consistent wall readings!");
+    }
+  } else {
+    Serial.println("visiting a new square");
+  }
+
+
+  return walls;
+}
 
 void Robot::Update_Maze(void) {
-  char cur_walls = Walls();
+  unsigned char cur_walls = Walls();
   maze.Visit(x,y,cur_walls);
   maze.Flood_Fill(x,y);
 }
@@ -153,13 +176,32 @@ void printmaze(Maze& maze) {
   }
 }
 
+void printwalls(unsigned char walls) {
+  if(NORTH_WALL(walls))
+    Serial.println("North");
+  if(EAST_WALL(walls))
+    Serial.println("East");
+  if(SOUTH_WALL(walls))
+    Serial.println("South");
+  if(WEST_WALL(walls))
+    Serial.println("West");
+}
+
 int Robot::Maze_Step(void) {
-  char direction = maze.Get_Direction(x,y);
+  unsigned char direction = maze.Get_Direction(x,y);
   if(direction == 0) {
     Serial.println("direction = 0!");
     return 0;
   }
   printmaze(maze);
+  Serial.print("position: ");
+  Serial.print((uint)x);
+  Serial.print(" ");
+  Serial.print((uint)y);
+  Serial.print("\n\r");
+  Serial.println("Walls here:");
+  printwalls(maze.grid[x][y].walls_visits);
+
   switch(direction) {
   case NORTH:
     Serial.println("direction = NORTH!");
@@ -177,7 +219,43 @@ int Robot::Maze_Step(void) {
     Serial.println("direction is strange!");
   }
 
-  Go(1,direction);
+  /*ok, if we want to go straight through n explored squares
+   *we should do it as one Go command*/
+
+  int numsquares = 1;
+  
+  char delx;
+  char dely;
+  
+  switch(direction) {
+  case SOUTH:
+    delx = 0;
+    dely = 1;
+    break;
+  case NORTH:
+    delx = 0;
+    dely = -1;
+    break;
+  case EAST:
+    dely=0;
+    delx = 1;
+    break;
+  case WEST:
+    dely=0;
+    delx = -1;
+    break;
+  }
+
+  unsigned char tempx = x+delx;
+  unsigned char tempy = y+dely;
+
+  while(VISITS(maze.grid[tempx][tempy].walls_visits)!=0 && maze.Get_Direction(tempx,tempy)==direction) {
+    numsquares++;
+    tempx += delx;
+    tempy += dely;
+  }
+
+  Go(numsquares,direction);
   Update_Maze();
   return 1;
 }
