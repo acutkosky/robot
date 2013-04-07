@@ -4,14 +4,14 @@
  *interfaces the robot with the driver and the maze systems
  */
 
-#include "driver.h"
-#include "floodfill.h"
+#include "driver.cpp"
+#include "floodfill.cpp"
 
-#define STEPS_PER_DEGREE (1000.0/1040.0)
-#define SQUARE_LENGTH 100 //length of a square in steps of the motors.
+#define STEPS_PER_DEGREE 0.96
+#define SQUARE_LENGTH 192.98 //length of a square in steps of the motors.
 
 class Robot {
-
+ public:
   Driver driver;
   Maze maze;
   char orientation;
@@ -75,4 +75,4 @@ class Robot {
    *just initializes everything to default parameters (orientation is east, starting in the upper left corner
    */
   Robot(void);
-}
+};

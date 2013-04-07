@@ -7,14 +7,14 @@
 
 #pragma once
 
-#define ABS(A) (A<0?-A:A)
-#define MIN(A,B) (A<B?A:B)
+//#define ABS(A) (A<0?-A:A)
+//#define MIN(A,B) (A<B?A:B)
 
-#define GRID_SIZE 16
-#define NORTH (1<<7)
-#define EAST (1<<6)
-#define SOUTH (1<<5)
-#define WEST (1<<4)
+#define GRID_SIZE 4
+#define NORTH ((char)(1<<7))
+#define EAST ((char)(1<<6))
+#define SOUTH ((char)(1<<5))
+#define WEST ((char)(1<<4))
 
 #define VISITS_MASK (15)
 #define WALLS_MASK (15<<4)
@@ -85,6 +85,11 @@ class Maze {
    */
   char Get_Direction(char x, char y);
 
+  /*
+   *Reset_Goal:
+   *sets the given position to the goal of the maze, reflood-fills it
+   */
+  void Reset_Goal(char x, char y);
  private:
 
   /*

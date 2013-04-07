@@ -14,15 +14,15 @@ DistanceSensor::DistanceSensor(int apin) {
 void DistanceSensor::calibrate(void) {
   float volts = 0.0;
   for(int i=0;i<100;i++) {
-    volts += analogRead(pin);
-    delay(10);
+    volts += delay_read(2,5);
+    //delay(10);
   }
   middle_distance = volts/100.0;
 }
 
 float DistanceSensor::imbalance(void) {
   float r = read();
-  if(r>Right_Open_Threshold)
+  if(r>RIGHT_OPEN_THRESHOLD)
     return r-middle_distance;
   return 0;
 }
@@ -31,15 +31,23 @@ DistanceSensor::DistanceSensor() {
 }
 
 /* reads the voltage from a distance sensor */
-float DistanceSensor::read(void) {
+float DistanceSensor::read(int num) {
   float ret =0;
-  for(int i=0;i<6;i++) {
+  for(int i=0;i<num;i++) {
     ret += analogRead(pin);
   }
-  return ret/6.0;
+  return ret/num;
   //  return (analogRead(pin)+analogRead(pin)+analogRead(pin)+analogRead(pin))/4.0;
 }
 
+float DistanceSensor::delay_read(int num, int del) {
+  float ret = 0;
+  for(int i=0;i<num;i++) {
+    ret += analogRead(pin);
+    delay(del);
+  }
+  return ret/num;
+}
 
 Driver::Driver(int rs_pin,int ls_pin, int fs_pin, int rd_pin,
 	       int rm_pin, int ld_pin, int lm_pin) {
@@ -57,7 +65,8 @@ void Driver::setup(void) {
 
   right_sensor.calibrate();
   left_sensor.calibrate();
-  forward_sensor.calibrate();
+
+
 
   right_stepper.stop();
   left_stepper.stop();
@@ -69,6 +78,14 @@ void Driver::setup(void) {
   left_stepper.setMaxSpeed(500.0);
   last_err = 0.0;
   last_time = micros();
+
+  //Turn(1000/1040.0*90.0);
+  
+  //forward_sensor.calibrate();
+
+  //Turn(-1000/1040.0*90.0);
+  forward_sensor.middle_distance = 475;
+
 }
 
 
@@ -112,12 +129,13 @@ void Driver::Turn(int steps) {
   RunToTarget(right_stepper,left_stepper);
 }
 
-void Driver::Forward(int steps) {
+float Driver::Forward(int steps) {
   right_stepper.stop();
   left_stepper.stop();
   right_stepper.setCurrentPosition(0);
   left_stepper.setCurrentPosition(0);
   
+
   float rs,ls;
   float accel = 1.0;
   right_speed = left_speed = target_speed;
@@ -129,7 +147,7 @@ void Driver::Forward(int steps) {
   left_stepper.setSpeed(left_speed);
   float meta_target_speed = 0.0;
 
-  while(-right_stepper.currentPosition()+left_stepper.currentPosition()<2*steps && forward_sensor.read() < Forward_Open_Threshold) {
+  while((-right_stepper.currentPosition()+left_stepper.currentPosition())<(2*steps) && forward_sensor.read() < forward_sensor.middle_distance) {
     /* three cases:
      * we are in a hallway (easiest, can use both sensors)
      * in a T junction (just use on sensor)
@@ -146,14 +164,14 @@ void Driver::Forward(int steps) {
     rs = right_sensor.read();
     ls = left_sensor.read();
     float err = 0;
-    if(rs > Right_Open_Threshold) {
+    if(rs > RIGHT_OPEN_THRESHOLD) {
       //there is a wall to the right!
       err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*1800;
 
 
     }
         
-    if(ls> Left_Open_Threshold) {
+    if(ls> LEFT_OPEN_THRESHOLD) {
       //there is a wall to the left!
       err +=  (1.0/ls-1.0/left_sensor.middle_distance)*1900;
 
@@ -166,7 +184,7 @@ void Driver::Forward(int steps) {
     //last_time = t;
     //float turn = right_speed-left_speed;
     //err -= turn/80;
-    err = err*SIGN(err)>1.25?1.25*SIGN(err):err;
+    err = err*SIGN(err)>1.2?1.2*SIGN(err):err;
 
     float D = (err-last_err);
     last_err = err;
@@ -187,6 +205,9 @@ void Driver::Forward(int steps) {
     right_stepper.runSpeed();
     left_stepper.runSpeed();
   }
+
+  return (-right_stepper.currentPosition()+left_stepper.currentPosition())/2.0;
+
 }
 
 
