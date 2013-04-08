@@ -5,6 +5,7 @@ Robot::Robot(void) {
   driver = Driver();
   orientation = EAST;
   x = y = 0;
+  explored_new = 0;
 }
 
 
@@ -37,6 +38,14 @@ void Robot::Advance(int squares) {
 }
 
 void Robot::Turn(int degrees) {
+  if(degrees == 180 ) {
+    // hack for turning to the further wall if turning around
+    if(driver.right_sensor.read() >driver.right_sensor.middle_distance) {
+      driver.Turn(-180*STEPS_PER_DEGREE);
+      return;
+    }
+  }
+
   driver.Turn(degrees*STEPS_PER_DEGREE);
 }
 
@@ -85,6 +94,7 @@ void Robot::Go(int squares,unsigned char direction) {
 
   if(turn == -270)
     turn = 90;
+
 
   Turn(turn);
 
@@ -159,10 +169,15 @@ unsigned char Robot::Walls(void) {
   return walls;
 }
 
-void Robot::Update_Maze(void) {
+unsigned char Robot::Update_Maze(void) {
   unsigned char cur_walls = Walls();
+  unsigned char visits = VISITS(maze.grid[x][y].walls_visits);
+  if(visits == 0) //
+    explored_new = 1;
+
   maze.Visit(x,y,cur_walls);
-  maze.Flood_Fill(x,y);
+  return maze.Flood_Fill(x,y);
+
 }
 
 
@@ -193,6 +208,8 @@ int Robot::Maze_Step(void) {
     Serial.println("direction = 0!");
     return 0;
   }
+
+#ifdef DEBUG
   printmaze(maze);
   Serial.print("position: ");
   Serial.print((uint)x);
@@ -218,6 +235,7 @@ int Robot::Maze_Step(void) {
   default:
     Serial.println("direction is strange!");
   }
+#endif
 
   /*ok, if we want to go straight through n explored squares
    *we should do it as one Go command*/
@@ -256,20 +274,23 @@ int Robot::Maze_Step(void) {
   }
 
   Go(numsquares,direction);
-  Update_Maze();
+  if(VISITS(maze.grid[x][y].walls_visits)==0) 
+    Update_Maze();
   return 1;
 }
 
 
 
-void Robot::Solve(void) {
+unsigned char Robot::Solve(void) {
 
   //make sure everything is set up.
   Update_Maze();
-
+  explored_new = 0;
   while(Maze_Step());
 
   //done!
+
+  return explored_new;
 }
 
   

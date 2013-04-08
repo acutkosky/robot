@@ -17,7 +17,7 @@ class Robot {
   unsigned char orientation;
   unsigned char x;
   unsigned char y;
-
+  unsigned char explored_new;
 
 
   /*
@@ -52,7 +52,7 @@ class Robot {
    *takes sensor readings to update the current location's
    *walls in the maze, then recalculates flood-fill
    */
-  void Update_Maze(void);
+  unsigned char Update_Maze(void);
 
   /*
    *Maze_Step:
@@ -68,7 +68,7 @@ class Robot {
    *Solves the maze by calling Maze_Step repeatedly
    *blocks until the maze is solved
    */
-  void Solve(void);
+  unsigned char Solve(void);
 
   unsigned char Read_Walls(void);
   

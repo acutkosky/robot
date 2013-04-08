@@ -10,7 +10,7 @@
 //#define ABS(A) (A<0?-A:A)
 //#define MIN(A,B) (A<B?A:B)
 
-#define GRID_SIZE 5
+#define GRID_SIZE 16
 #define NORTH ((unsigned char)(128))
 #define EAST ((unsigned char)(64))
 #define SOUTH ((unsigned char)(32))

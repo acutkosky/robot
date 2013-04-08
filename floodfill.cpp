@@ -198,13 +198,17 @@ void Maze::Add_Walls(unsigned char x, unsigned char y, unsigned char wall) {
 
 unsigned char Maze::Flood_Fill(unsigned char x, unsigned char y) {
   unsigned char stable = 0;
+  unsigned char changed = 0; //set to one if any part of the maze was changed
   while(!stable) {
     stable = 1;
     for(unsigned char x=0;x<GRID_SIZE;x++) {
       for(unsigned char y=0;y<GRID_SIZE;y++) {
-	if(Update_Distance(x,y) != 1) //it was changed
+	if(Update_Distance(x,y) != 1) {//it was changed
 	  stable = 0;
+	  changed = 1;
+	}
       }
     }
   }
+  return changed;
 }
