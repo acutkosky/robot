@@ -5,9 +5,10 @@
 #define DRIVER_h
 
 /*random hard coded constants*/
-#define Right_Open_Threshold 230.0
-#define Left_Open_Threshold 230.0
-#define Forward_Open_Threshold 410.0
+#define RIGHT_OPEN_THRESHOLD 180.0
+#define LEFT_OPEN_THRESHOLD 230.0
+#define FORWARD_OPEN_THRESHOLD 260.0
+
 
 struct DistanceSensor {
   int pin;
@@ -15,7 +16,8 @@ struct DistanceSensor {
   DistanceSensor(int);
   DistanceSensor();
   void calibrate(void);
-  float read(void);
+  float read(int num=6);
+  float delay_read(int,int);
   float imbalance(void);
 };
 
@@ -29,6 +31,8 @@ class Driver {
   float right_speed;
   float left_speed;
   float target_speed;
+
+  float current_speed;
 
   float last_err;
   unsigned long last_time;
@@ -52,8 +56,12 @@ class Driver {
   /* int = number of steps in a turn ~ 100 for 90 degrees*/
   void Turn(int);
 
-  /*run forward this many steps, using walls for guidance*/
-  void Forward(int);
+  /*
+   *run forward this many steps, using walls for guidance
+   *stops if forward sensor sees a wall
+   *returns number of steps moved
+   */
+  float Forward(int);
 
   void SetTargetSpeed(float);
 

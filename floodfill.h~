@@ -1,0 +1,54 @@
+
+/*
+ *floodfill algorithm. We will do a full floodfill for each step for now. 
+ */
+
+
+#define GRID_SIZE 16
+#define NORTH (1<<7)
+#define SOUTH (1<<6)
+#define EAST (1<<5)
+#define WEST (1<<4)
+
+#define VISITS_MASK (15)
+
+#define VISITS(val) (val|VISITS_MASK)
+
+#define NORTH_WALL(val) (val|NORTH)
+#define SOUTH_WALL(val) (val|SOUTH)
+#define EAST_WALL(val) (val|EAST)
+#define WEST_WALL(val) (val|WEST)
+
+
+
+struct Cell {
+  /*
+   *first 4 bits = NSEW walls (1 = there is a wall)
+   *second 4 bits = number of visits to this cell (caps at 15)
+   */
+  char walls_visits;
+
+  /*
+   *current best estimate of distance from this cell to the center
+   */
+  char distance;
+};
+
+class Maze {
+ public:
+  Cell grid[GRID_SIZE][GRID_SIZE];
+
+  /*
+   *constructor - sets up the grid with no walls and no visits, initializes distances
+   */
+  Maze(void);
+
+
+  /*
+   *updates distance value for cell at position x,y
+   *distance updates to minimum distance of a neighbor plus 1
+   *returns the cardinal direction of the neighbor with minimum distance
+   */
+  char Update(int x, int y);
+
+}
