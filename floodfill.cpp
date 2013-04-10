@@ -114,7 +114,7 @@ unsigned char Maze::Update_Distance(unsigned char x, unsigned char y) {
 unsigned char Maze::Get_Direction(unsigned char x, unsigned char y) {
   unsigned char walls = grid[x][y].walls_visits;
 
-  unsigned char target_distance = grid[x][y].distance-1;
+  unsigned char best_distance = 255;
   unsigned char best_visits = 15;
   unsigned char best_direction;
 
@@ -123,38 +123,42 @@ unsigned char Maze::Get_Direction(unsigned char x, unsigned char y) {
     return 0;
   //cout<<"target distance: "<<(int)target_distance<<"\n";
   if(!NORTH_WALL(walls)) {
-    if(grid[x][y-1].distance == target_distance && VISITS(grid[x][y-1].walls_visits) <= best_visits) {
+    if(grid[x][y-1].distance < best_distance || (grid[x][y-1].distance==best_distance && VISITS(grid[x][y-1].walls_visits) <= best_visits)) {
       best_direction = NORTH;
       //cout<<"it's north!\n";
       best_visits = VISITS(grid[x][y-1].walls_visits);
+      best_distance = grid[x][y-1].distance;
    
     }
   }
 
 
   if(!SOUTH_WALL(walls)) {
-    if(grid[x][y+1].distance == target_distance && VISITS(grid[x][y+1].walls_visits) <= best_visits) {
+    if(grid[x][y+1].distance < best_distance || (grid[x][y+1].distance == best_distance && VISITS(grid[x][y+1].walls_visits) <= best_visits)) {
       best_direction = SOUTH;
       //cout<<"it's south!\n";
       best_visits = VISITS(grid[x][y+1].walls_visits);
+      best_distance = grid[x][y+1].distance;
     }
   }
 
 
   if(!EAST_WALL(walls)) {
-    if(grid[x+1][y].distance == target_distance && VISITS(grid[x][y].walls_visits) <= best_visits) {
+    if(grid[x+1][y].distance < best_distance || (grid[x+1][y].distance == best_distance && VISITS(grid[x+1][y].walls_visits) <= best_visits)) {
       best_direction = EAST;
       //cout<<"it's east!\n";
       best_visits = VISITS(grid[x+1][y].walls_visits);
+      best_distance = grid[x+1][y].distance;
     }
   }
 
 
   if(!WEST_WALL(walls)) {
-    if(grid[x-1][y].distance == target_distance && VISITS(grid[x-1][y].walls_visits) <= best_visits) {
+    if(grid[x-1][y].distance < best_distance || (grid[x-1][y].distance == best_distance && VISITS(grid[x-1][y].walls_visits) <= best_visits)) {
       best_direction = WEST;
       //cout<<"it's west!\n";
       best_visits = VISITS(grid[x-1][y].walls_visits);
+      best_distance = grid[x-1][y].distance;
     }
   }
 

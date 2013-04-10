@@ -78,7 +78,7 @@ void Driver::setup(void) {
   left_stepper.setMaxSpeed(1000.0);
   last_err = 0.0;
   last_time = micros();
-
+  current_speed = 0;
   //Turn(1000/1040.0*90.0);
   
   //forward_sensor.calibrate();
@@ -127,39 +127,46 @@ void Driver::Turn(int steps) {
   //right_stepper.setSpeed(target_speed*SIGN(steps));
   //left_stepper.setSpeed(target_speed*SIGN(steps));
   RunToTarget(right_stepper,left_stepper);
+  current_speed = 0;
 }
 
 float Driver::Forward(int steps) {
-  right_stepper.stop();
-  left_stepper.stop();
+  //right_stepper.stop();
+  //left_stepper.stop();
   right_stepper.setCurrentPosition(0);
   left_stepper.setCurrentPosition(0);
   
 
   float rs,ls;
   float accel = 1.0;
-  right_speed = left_speed = target_speed;
 
-  //  right_speed = left_speed = target_speed;
-  right_stepper.setMaxSpeed(1000);
-  left_stepper.setMaxSpeed(1000);
-  right_stepper.setSpeed(-right_speed);
-  left_stepper.setSpeed(left_speed);
-  float meta_target_speed = 0.0;
 
+
+  //right_speed = left_speed = target_speed;
+  //  right_stepper.setMaxSpeed(1000);
+  //  left_stepper.setMaxSpeed(1000);
+  //right_stepper.setSpeed(-right_speed);
+  //left_stepper.setSpeed(left_speed);
+  //float meta_target_speed = last_speed;
+  //Serial.println(current_speed);
+
+  //current_speed = 250.0;
+  //right_speed = left_speed = current_speed;
+  //right_stepper.setSpeed(-right_speed);
+  //left_stepper.setSpeed(left_speed);
   while((-right_stepper.currentPosition()+left_stepper.currentPosition())<(2*steps) && forward_sensor.read() < forward_sensor.middle_distance) {
     /* three cases:
      * we are in a hallway (easiest, can use both sensors)
      * in a T junction (just use on sensor)
      * in a crossroads (just trust to luck)
      */
-    
-    
-    if(meta_target_speed <target_speed-accel) {
-       meta_target_speed += accel;
+
+
+    if(current_speed <target_speed) {
+       current_speed += accel;
     }
     
-    right_speed = left_speed = meta_target_speed;
+    right_speed = left_speed = current_speed;
 
     rs = right_sensor.read();
     ls = left_sensor.read();
@@ -184,6 +191,7 @@ float Driver::Forward(int steps) {
     //last_time = t;
     //float turn = right_speed-left_speed;
     //err -= turn/80;
+    //err = 0.0;
     err = err*SIGN(err)>1.25?1.25*SIGN(err):err;
 
     float D = (err-last_err);
@@ -198,13 +206,25 @@ float Driver::Forward(int steps) {
     /*random hard coded constants*/
     //right_speed = right_speed-D/400.0;//-turn/295;
     //left_speed = left_speed+D/400.0;//+turn/295;
-    
+
     right_stepper.setSpeed(-right_speed);
     left_stepper.setSpeed(left_speed);
 
-    right_stepper.runSpeed();
-    left_stepper.runSpeed();
+    /*
+    Serial.println("true rs,ls,err");
+    Serial.println(right_stepper.speed());
+    Serial.println(left_stepper.speed());
+    Serial.println(err);
+    */
+    int rstep = right_stepper.runSpeed();
+    int lstep = left_stepper.runSpeed();
+    /*
+    Serial.println("rstep, lstep");
+    Serial.println(rstep);
+    Serial.println(lstep);
+    */
   }
+  //delay(1000);
 
   return (-right_stepper.currentPosition()+left_stepper.currentPosition())/2.0;
 

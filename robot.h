@@ -33,6 +33,15 @@ class Robot {
    */
   void Turn(int degrees);
 
+
+  /*
+   *Best_Direction:
+   *gets the best direction for the robot to move. Priority is given to going straight
+   */
+  unsigned char Best_Direction(void);
+
+
+
   /*
    *Go:
    *tells the robot to move a specified number of squares in the specified direction

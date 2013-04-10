@@ -1,6 +1,17 @@
 
 #include "robot.h"
 
+void printwalls(unsigned char walls) {
+  if(NORTH_WALL(walls))
+    Serial.println("North");
+  if(EAST_WALL(walls))
+    Serial.println("East");
+  if(SOUTH_WALL(walls))
+    Serial.println("South");
+  if(WEST_WALL(walls))
+    Serial.println("West");
+}
+
 Robot::Robot(void) {
   driver = Driver();
   orientation = EAST;
@@ -10,9 +21,11 @@ Robot::Robot(void) {
 
 
 void Robot::Advance(int squares) {
+  //  Serial.println("advancing");
   float dist = driver.Forward(squares*SQUARE_LENGTH);
-
-  if(driver.forward_sensor.delay_read(10,5)>FORWARD_OPEN_THRESHOLD) {
+  
+  //Serial.println("advanced!");
+  if(driver.forward_sensor.read(4)>FORWARD_OPEN_THRESHOLD) {
     //there is a wall in front of us - let's go forward until we hit it
     dist+=driver.Forward(0.25*SQUARE_LENGTH);
   }
@@ -40,7 +53,7 @@ void Robot::Advance(int squares) {
 void Robot::Turn(int degrees) {
   if(degrees == 180 ) {
     // hack for turning to the further wall if turning around
-    if(driver.right_sensor.read() >driver.right_sensor.middle_distance) {
+    if(driver.right_sensor.read()  > driver.right_sensor.middle_distance) {
       driver.Turn(-180*STEPS_PER_DEGREE);
       return;
     }
@@ -106,23 +119,29 @@ void Robot::Go(int squares,unsigned char direction) {
 
 unsigned char Robot::Read_Walls(void) {
   unsigned char walls = 0;
-  float fs = driver.forward_sensor.read(10);
-  float rs = driver.right_sensor.read(10);
-  float ls = driver.left_sensor.read(10);
+  float fs = driver.forward_sensor.read(4);
+  float rs = driver.right_sensor.read(4);
+  float ls = driver.left_sensor.read(4);
+#ifdef DEBUG
   Serial.print("\n\r");
+#endif
   if(fs> FORWARD_OPEN_THRESHOLD) {
     //there is a wall in front!
+#ifdef WALL_DEBUG
     Serial.print("wall in front! reading: ");
     Serial.print(fs);
     Serial.print("\n\r");
+#endif
     ADD_WALL(walls,orientation);
   }
 
-  if(driver.right_sensor.read(10) > RIGHT_OPEN_THRESHOLD) {
+  if(rs > RIGHT_OPEN_THRESHOLD) {
     //there is a wall to the right!
+#ifdef WALL_DEBUG
     Serial.print("wall to right! reading: ");
     Serial.print(rs);
     Serial.print("\n\r");
+#endif
     if(orientation == WEST) {
       ADD_WALL(walls,NORTH);
     } else {
@@ -130,11 +149,13 @@ unsigned char Robot::Read_Walls(void) {
     }
   }
 
-  if(driver.left_sensor.read(10) > LEFT_OPEN_THRESHOLD) {
+  if(ls > LEFT_OPEN_THRESHOLD) {
     //there is a wall to the left!
+#ifdef WALL_DEBUG
     Serial.print("wall to left! reading: ");
     Serial.print(ls);
     Serial.print("\n\r");
+#endif
     if(orientation == NORTH) {
       ADD_WALL(walls,WEST);
     } else {
@@ -159,10 +180,10 @@ unsigned char Robot::Walls(void) {
 	Serial.println("old reading discarded for a new one");
       }
     } else {
-      Serial.println("consistent wall readings!");
+      //Serial.println("consistent wall readings!");
     }
   } else {
-    Serial.println("visiting a new square");
+    //Serial.println("visiting a new square");
   }
 
 
@@ -172,11 +193,28 @@ unsigned char Robot::Walls(void) {
 unsigned char Robot::Update_Maze(void) {
   unsigned char cur_walls = Walls();
   unsigned char visits = VISITS(maze.grid[x][y].walls_visits);
-  if(visits == 0) //
+  unsigned char ret;
+
+  //are we in a corridor?
+  switch(orientation) {
+  case NORTH:
+  case SOUTH:
+    ret = (cur_walls == (EAST|WEST));
+    break;
+  case EAST:
+  case WEST:
+    ret = (cur_walls == (NORTH|SOUTH));
+    break;
+  }
+  if(visits == 0) {//
     explored_new = 1;
+    }
 
   maze.Visit(x,y,cur_walls);
-  return maze.Flood_Fill(x,y);
+  //printwalls(cur_walls);
+  //we only want to floodfill if we're about to turn
+
+  return ret;//maze.Flood_Fill(x,y);
 
 }
 
@@ -191,21 +229,76 @@ void printmaze(Maze& maze) {
   }
 }
 
-void printwalls(unsigned char walls) {
-  if(NORTH_WALL(walls))
-    Serial.println("North");
-  if(EAST_WALL(walls))
-    Serial.println("East");
-  if(SOUTH_WALL(walls))
-    Serial.println("South");
-  if(WEST_WALL(walls))
-    Serial.println("West");
+unsigned char Robot::Best_Direction(void) {
+  unsigned char target_distance = maze.grid[x][y].distance;
+  if(target_distance == 0) {
+    return 0;
+  } else {
+    target_distance--;
+  }
+
+  if(!(orientation&maze.grid[x][y].walls_visits)) {
+    switch(orientation) {
+    case NORTH:
+      if(maze.grid[x][y-1].distance <= target_distance)
+	return NORTH;
+      break;
+    case EAST:
+      if(maze.grid[x+1][y].distance <= target_distance)
+	return EAST;
+      break;
+    case SOUTH:
+      if(maze.grid[x][y+1].distance <= target_distance)
+	return SOUTH;
+      break;
+    case WEST:
+      if(maze.grid[x-1][y].distance <= target_distance)
+	return WEST;
+      break;
+    }
+  }
+
+  return maze.Get_Direction(x,y);
 }
 
 int Robot::Maze_Step(void) {
-  unsigned char direction = maze.Get_Direction(x,y);
+
+  //if we are in a corridor then go straight. otherwise floodfill.
+  unsigned char corridor = Update_Maze();  
+  unsigned char visits = VISITS(maze.grid[x][y].walls_visits);
+
+
+
+  unsigned char direction;
+
+
+  if(visits == 1) {
+    if(corridor) {
+
+      //Serial.println("corridor!");
+      direction = orientation;
+    } else {
+      //Serial.println("floodfilling!");
+      driver.current_speed = 0;
+      maze.Flood_Fill(x,y);
+      direction = Best_Direction();
+    }
+  } else {
+    direction = Best_Direction();
+    //Serial.println("visited square!");
+  }
+
+    
+
+
+  /*
+  if(direction != orientation && VISITS(maze.grid[x][y].walls_visits)==0) {
+    maze.Flood_Fill(x,y);
+    direction = maze.Get_Direction(x,y);
+  }
+  */
   if(direction == 0) {
-    Serial.println("direction = 0!");
+    //Serial.println("direction = 0!");
     return 0;
   }
 
@@ -272,11 +365,17 @@ int Robot::Maze_Step(void) {
     tempx += delx;
     tempy += dely;
   }
-
+  /*  Serial.println("calced numsquares. direction:");
+  printwalls(direction);
+  Serial.println("numsquares:");
+  Serial.println(numsquares);
+  */
   Go(numsquares,direction);
-  if(VISITS(maze.grid[x][y].walls_visits)==0) 
-    Update_Maze();
+  //Serial.println("went!");
+
+
   return 1;
+
 }
 
 

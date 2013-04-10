@@ -31,6 +31,8 @@ class Driver {
   float left_speed;
   float target_speed;
 
+  float current_speed;
+
   float last_err;
   unsigned long last_time;
 
