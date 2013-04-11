@@ -1,6 +1,6 @@
 
 #include "robot.h"
-
+/*
 void printwalls(unsigned char walls) {
   if(NORTH_WALL(walls))
     Serial.println("North");
@@ -11,7 +11,7 @@ void printwalls(unsigned char walls) {
   if(WEST_WALL(walls))
     Serial.println("West");
 }
-
+*/
 Robot::Robot(void) {
   driver = Driver();
   orientation = EAST;
@@ -171,6 +171,7 @@ unsigned char Robot::Read_Walls(void) {
 unsigned char Robot::Walls(void) {
 
   unsigned char walls = Read_Walls();
+  /*
   if(VISITS(maze.grid[x][y].walls_visits)!=0) {
     if(walls != WALLS(maze.grid[x][y].walls_visits)) {
       //something changed? better check again...
@@ -188,7 +189,7 @@ unsigned char Robot::Walls(void) {
     //Serial.println("visiting a new square");
   }
 
-
+  */
   return walls;
 }
 
@@ -220,17 +221,17 @@ unsigned char Robot::Update_Maze(void) {
 
 }
 
-
+/*
 void printmaze(Maze& maze) {
-  for(int i=0;i<GRID_SIZE;i++){
-    for(int j=0;j<GRID_SIZE;j++) {
+  for(int i=0;i<5;i++){
+    for(int j=0;j<5;j++) {
       Serial.print((uint)maze.grid[j][i].distance);
       Serial.print(" ");
     }
     Serial.print("\n\r");
   }
 }
-
+*/
 unsigned char Robot::Best_Direction(void) {
   unsigned char target_distance = maze.grid[x][y].distance;
   if(target_distance == 0) {
@@ -289,7 +290,7 @@ int Robot::Maze_Step(void) {
     direction = Best_Direction();
     //Serial.println("visited square!");
   }
-
+  //printmaze(maze);
     
 
 
