@@ -8,7 +8,7 @@
 #include "floodfill.cpp"
 
 
-#define REVERSE_COMPENSATION 0.15
+#define REVERSE_COMPENSATION 0.1
 #define STEPS_PER_DEGREE 0.96
 #define SQUARE_LENGTH 192.98 //length of a square in steps of the motors.
 
