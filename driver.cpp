@@ -138,7 +138,7 @@ float Driver::Forward(int steps) {
   
 
   float rs,ls;
-  float accel = 1.0;
+  float accel = 0.5;
 
 
 
