@@ -1,6 +1,6 @@
 #include "driver.h"
 #define SIGN(x) (x<0?-1:1)
-#define k_p 50
+#define k_p 65.0
 
 /* constructor for DistanceSensor class.
  * takes an analog pin number and immediately calibrates
@@ -138,8 +138,9 @@ float Driver::Forward(int steps) {
   
 
   float rs,ls;
-  float accel = 1.0;
+  float accel = 0.5;
 
+      digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW;
 
 
   //right_speed = left_speed = target_speed;
@@ -192,7 +193,7 @@ float Driver::Forward(int steps) {
     //float turn = right_speed-left_speed;
     //err -= turn/80;
     //err = 0.0;
-    err = err*SIGN(err)>1.25?1.25*SIGN(err):err;
+    err = err*SIGN(err)>1.3?1.3*SIGN(err):err;
 
     float D = (err-last_err);
     last_err = err;
@@ -225,7 +226,7 @@ float Driver::Forward(int steps) {
     */
   }
   //delay(1000);
-
+      digitalWrite(13, HIGH);    // turn the LED off by making the voltage LOW
   return (-right_stepper.currentPosition()+left_stepper.currentPosition())/2.0;
 
 }

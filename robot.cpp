@@ -171,16 +171,16 @@ unsigned char Robot::Read_Walls(void) {
 unsigned char Robot::Walls(void) {
 
   unsigned char walls = Read_Walls();
-  /*
+  
   if(VISITS(maze.grid[x][y].walls_visits)!=0) {
     if(walls != WALLS(maze.grid[x][y].walls_visits)) {
       //something changed? better check again...
-      Serial.println("oh no! inconsistent wall readings...");
+      //Serial.println("oh no! inconsistent wall readings...");
       walls = Read_Walls();
       if(walls == WALLS(maze.grid[x][y].walls_visits)) {
-	Serial.println("inconsistencies resolved to old reading");
+	//Serial.println("inconsistencies resolved to old reading");
       } else {
-	Serial.println("old reading discarded for a new one");
+	//Serial.println("old reading discarded for a new one");
       }
     } else {
       //Serial.println("consistent wall readings!");
@@ -189,7 +189,7 @@ unsigned char Robot::Walls(void) {
     //Serial.println("visiting a new square");
   }
 
-  */
+  
   return walls;
 }
 
@@ -302,6 +302,12 @@ int Robot::Maze_Step(void) {
   */
   if(direction == 0) {
     //Serial.println("direction = 0!");
+    while(1) {
+      digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+      delay(3000);               // wait for a second
+      digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+      delay(3000);
+    }
     return 0;
   }
 
@@ -329,6 +335,7 @@ int Robot::Maze_Step(void) {
     Serial.println("direction = SOUTH!");
     break;
   default:
+
     Serial.println("direction is strange!");
   }
 #endif
@@ -358,6 +365,15 @@ int Robot::Maze_Step(void) {
     dely=0;
     delx = -1;
     break;
+  default:
+    //oh noes
+    while(1) {
+      digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+      delay(2000);               // wait for a second
+      digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+      delay(2000);
+    }
+
   }
 
   unsigned char tempx = x+delx;
