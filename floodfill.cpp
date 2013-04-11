@@ -13,6 +13,8 @@ Maze::Maze(void) {
     for(int y=0;y<GRID_SIZE;y++) {
       grid[x][y].walls_visits = 0;
       grid[x][y].distance = 127;
+      grid[x][y].turns = 255;
+      grid[x][y].valid_directions = NORTH|SOUTH|EAST|WEST;
     }
   }
   grid[GRID_SIZE/2][GRID_SIZE/2].distance = 0;
@@ -59,6 +61,8 @@ void Maze::Reset_Goal(unsigned char x, unsigned char y) {
     }
   }
   grid[x][y].distance = 0;
+  grid[x][y].turns = 0;
+  grid[x][y].valid_directions = NORTH|SOUTH|EAST|WEST;
   Flood_Fill(0,0);
 }
 
@@ -111,6 +115,144 @@ unsigned char Maze::Update_Distance(unsigned char x, unsigned char y) {
 
 }
 
+unsigned char Maze::Get_Best_Direction(unsigned char x,unsigned char y, unsigned char orientation) {
+  unsigned char walls = grid[x][y].walls_visits;
+  unsigned char best_visits = 15;
+  unsigned char best_distance = 255;
+  unsigned char best_direction;
+  unsigned char best_turns = 255;
+
+  unsigned char distance,visits,turns;
+
+  if(grid[x][y].distance == 0)
+    return 0;
+  
+  unsigned char valids = grid[x][y].valid_directions;
+  if((orientation&valids)!=0) {
+    return orientation;
+  }
+
+  if(NORTH_WALL(valids))
+    return NORTH;
+  if(SOUTH_WALL(valids))
+    return SOUTH;
+  if(EAST_WALL(valids))
+    return EAST;
+  if(WEST_WALL(valids))
+    return WEST;
+  return 0;
+  
+  if(!NORTH_WALL(walls)) {
+    distance = grid[x][y-1].distance;
+    visits = VISITS(grid[x][y-1].walls_visits);
+    turns = grid[x][y-1].turns+(orientation!=NORTH)+(NORTH&(grid[x][y-1].valid_directions)==0);
+
+    if(distance < best_distance) {
+      best_direction = NORTH;
+      best_distance = distance;
+      best_visits = visits;
+      best_turns = turns;
+    } else if(distance == best_distance) {
+      if(turns<best_turns) {
+	best_direction = NORTH;
+	best_distance = distance;
+	best_visits = visits;
+	best_turns = turns;
+      } else if(turns == best_turns) {
+	if(visits< best_visits) {
+	  best_direction = NORTH;
+	  best_distance = distance;
+	  best_visits = visits;
+	  best_turns = turns;
+	}
+      }
+    }
+  }
+
+  if(!SOUTH_WALL(walls)) {
+    distance = grid[x][y+1].distance;
+    visits = VISITS(grid[x][y+1].walls_visits);
+    turns = grid[x][y+1].turns+(orientation!=SOUTH)+(SOUTH&(grid[x][y+1].valid_directions)==0);
+
+    if(distance < best_distance) {
+      best_direction = SOUTH;
+      best_distance = distance;
+      best_visits = visits;
+      best_turns = turns;
+    } else if(distance == best_distance) {
+      if(turns<best_turns) {
+	best_direction = SOUTH;
+	best_distance = distance;
+	best_visits = visits;
+	best_turns = turns;
+      } else if(turns == best_turns) {
+	if(visits< best_visits) {
+	  best_direction = SOUTH;
+	  best_distance = distance;
+	  best_visits = visits;
+	  best_turns = turns;
+	}
+      }
+    }
+  }
+
+  if(!EAST_WALL(walls)) {
+    distance = grid[x+1][y].distance;
+    visits = VISITS(grid[x+1][y].walls_visits);
+    turns = grid[x+1][y].turns+(orientation!=EAST)+(EAST&(grid[x+1][y].valid_directions)==0);
+
+    if(distance < best_distance) {
+      best_direction = EAST;
+      best_distance = distance;
+      best_visits = visits;
+      best_turns = turns;
+    } else if(distance == best_distance) {
+      if(turns<best_turns) {
+	best_direction = EAST;
+	best_distance = distance;
+	best_visits = visits;
+	best_turns = turns;
+      } else if(turns == best_turns) {
+	if(visits< best_visits) {
+	  best_direction = EAST;
+	  best_distance = distance;
+	  best_visits = visits;
+	  best_turns = turns;
+	}
+      }
+    }
+  }
+
+  if(!WEST_WALL(walls)) {
+    distance = grid[x-1][y].distance;
+    visits = VISITS(grid[x-1][y].walls_visits);
+    turns = grid[x-1][y].turns+(orientation!=WEST)+(WEST&(grid[x-1][y].valid_directions)==0);
+
+    if(distance < best_distance) {
+      best_direction = WEST;
+      best_distance = distance;
+      best_visits = visits;
+      best_turns = turns;
+    } else if(distance == best_distance) {
+      if(turns<best_turns) {
+	best_direction = WEST;
+	best_distance = distance;
+	best_visits = visits;
+	best_turns = turns;
+      } else if(turns == best_turns) {
+	if(visits< best_visits) {
+	  best_direction = WEST;
+	  best_distance = distance;
+	  best_visits = visits;
+	  best_turns = turns;
+	}
+      }
+    }
+  }
+  return best_direction;
+}
+
+
 unsigned char Maze::Get_Direction(unsigned char x, unsigned char y) {
   unsigned char walls = grid[x][y].walls_visits;
 
@@ -122,6 +264,7 @@ unsigned char Maze::Get_Direction(unsigned char x, unsigned char y) {
   if(grid[x][y].distance == 0) 
     return 0;
   //cout<<"target distance: "<<(int)target_distance<<"\n";
+
   if(!NORTH_WALL(walls)) {
     if(grid[x][y-1].distance < best_distance || (grid[x][y-1].distance==best_distance && VISITS(grid[x][y-1].walls_visits) <= best_visits)) {
       best_direction = NORTH;
@@ -199,6 +342,75 @@ void Maze::Add_Walls(unsigned char x, unsigned char y, unsigned char wall) {
 
 }
 
+unsigned char Maze::Update_Turns(unsigned char x, unsigned char y) {
+  if(grid[x][y].distance == 0) {
+    return 1;
+  }
+  unsigned char old_turns = grid[x][y].turns;
+  unsigned char old_valids = grid[x][y].valid_directions;
+
+  unsigned char walls = WALLS(grid[x][y].walls_visits);
+  unsigned char bestturns = 255;
+  unsigned char directions = 0;
+  
+  unsigned char target_distance = grid[x][y].distance-1;
+  unsigned char turns;
+  if(!NORTH_WALL(walls)) {
+    if(grid[x][y-1].distance == target_distance) {
+      turns =grid[x][y-1].turns+((NORTH&grid[x][y-1].valid_directions) == 0);
+	if(turns <bestturns) {
+	  bestturns = turns;
+	  directions = 0;
+	}
+	if(turns==bestturns) {
+	  directions |= NORTH;
+	}
+    }
+  }
+
+  if(!SOUTH_WALL(walls)) {
+    if(grid[x][y+1].distance == target_distance) {
+      turns =grid[x][y+1].turns+((SOUTH&grid[x][y+1].valid_directions) == 0);
+	if(turns <bestturns) {
+	  bestturns = turns;
+	  directions = 0;
+	}
+	if(turns==bestturns) {
+	  directions |= SOUTH;
+	}
+    }
+  }
+
+  if(!EAST_WALL(walls)) {
+    if(grid[x][y-1].distance == target_distance) {
+      turns =grid[x+1][y].turns+((EAST&grid[x+1][y].valid_directions) == 0);
+	if(turns <bestturns) {
+	  bestturns = turns;
+	  directions = 0;
+	}
+	if(turns==bestturns) {
+	  directions |= EAST;
+	}
+    }
+  }
+
+  if(!WEST_WALL(walls)) {
+    if(grid[x][y-1].distance == target_distance) {
+      turns =grid[x-1][y].turns+((WEST&grid[x-1][y].valid_directions) == 0);
+	if(turns <bestturns) {
+	  bestturns = turns;
+	  directions = 0;
+	}
+	if(turns==bestturns) {
+	  directions |= WEST;
+	}
+    }
+  }
+
+  grid[x][y].turns = bestturns;
+  grid[x][y].valid_directions = directions;
+  return (bestturns  == old_turns)&&(directions == old_valids);
+}
 
 unsigned char Maze::Flood_Fill(unsigned char x, unsigned char y) {
   unsigned char stable = 0;
@@ -207,12 +419,14 @@ unsigned char Maze::Flood_Fill(unsigned char x, unsigned char y) {
     stable = 1;
     for(unsigned char x=0;x<GRID_SIZE;x++) {
       for(unsigned char y=0;y<GRID_SIZE;y++) {
-	if(Update_Distance(x,y) != 1) {//it was changed
+	if((Update_Distance(x,y)!=1)&&(Update_Turns(x,y) != 1)) {//it was changed
 	  stable = 0;
 	  changed = 1;
 	}
       }
     }
+
+
   }
   return changed;
 }

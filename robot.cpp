@@ -20,7 +20,7 @@ Robot::Robot(void) {
 }
 
 
-void Robot::Advance(int squares) {
+void Robot::Advance(float squares) {
   //  Serial.println("advancing");
   float dist = driver.Forward(squares*SQUARE_LENGTH);
   
@@ -30,31 +30,31 @@ void Robot::Advance(int squares) {
     dist+=driver.Forward(0.25*SQUARE_LENGTH);
   }
 
-  squares = (int)(dist/SQUARE_LENGTH+0.5);
+  int moved = (int)(dist/SQUARE_LENGTH+0.5);
 
   /*update position*/
   switch(orientation) {
   case NORTH:
-    y-=squares;
+    y-=moved;
     break;
   case EAST:
-    x+=squares;
+    x+=moved;
     break;
   case SOUTH:
-    y+=squares;
+    y+=moved;
     break;
   case WEST:
-    x-=squares;
+    x-=moved;
     break;
   }
 
 }
 
 void Robot::Turn(int degrees) {
-  if(degrees == 180 ) {
+  if(degrees == 180 || degrees == -180) {
     // hack for turning to the further wall if turning around
     if(driver.right_sensor.read()  > driver.right_sensor.middle_distance) {
-      driver.Turn(-180*STEPS_PER_DEGREE);
+      driver.Turn(180*STEPS_PER_DEGREE);
       return;
     }
   }
@@ -62,7 +62,7 @@ void Robot::Turn(int degrees) {
   driver.Turn(degrees*STEPS_PER_DEGREE);
 }
 
-void Robot::Go(int squares,unsigned char direction) {
+void Robot::Go(float squares,unsigned char direction) {
 
   if(orientation == direction) {
     Advance(squares);
@@ -108,6 +108,9 @@ void Robot::Go(int squares,unsigned char direction) {
   if(turn == -270)
     turn = 90;
 
+  if(turn == 180 || turn == -180) {
+    squares -= REVERSE_CORRECTION;
+  }
 
   Turn(turn);
 
@@ -281,10 +284,10 @@ int Robot::Maze_Step(void) {
       //Serial.println("floodfilling!");
       driver.current_speed = 0;
       maze.Flood_Fill(x,y);
-      direction = Best_Direction();
+      direction = maze.Get_Best_Direction(x,y,orientation);
     }
   } else {
-    direction = Best_Direction();
+    direction = maze.Get_Best_Direction(x,y,orientation);
     //Serial.println("visited square!");
   }
 
@@ -333,7 +336,7 @@ int Robot::Maze_Step(void) {
   /*ok, if we want to go straight through n explored squares
    *we should do it as one Go command*/
 
-  int numsquares = 1;
+  float numsquares = 1.0;
   
   char delx;
   char dely;
@@ -361,7 +364,7 @@ int Robot::Maze_Step(void) {
   unsigned char tempy = y+dely;
 
   while(VISITS(maze.grid[tempx][tempy].walls_visits)!=0 && maze.Get_Direction(tempx,tempy)==direction) {
-    numsquares++;
+    numsquares+= 1.0;
     tempx += delx;
     tempy += dely;
   }
@@ -384,6 +387,7 @@ unsigned char Robot::Solve(void) {
 
   //make sure everything is set up.
   Update_Maze();
+  maze.Flood_Fill(0,0);
   explored_new = 0;
   while(Maze_Step());
 

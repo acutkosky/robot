@@ -7,8 +7,14 @@
 #include "driver.cpp"
 #include "floodfill.cpp"
 
+
+
+
 #define STEPS_PER_DEGREE 0.96
 #define SQUARE_LENGTH 192.98 //length of a square in steps of the motors.
+
+#define REVERSE_CORRECTION 0.0
+
 
 class Robot {
  public:
@@ -24,7 +30,7 @@ class Robot {
    *Advance:
    *tells the robot to go a specified number of grid squares forward
    */
-  void Advance(int squares);
+  void Advance(float squares);
 
   /*
    *Turn:
@@ -48,7 +54,7 @@ class Robot {
    *calls advance and turn as appropriate.
    *sets orientation.
    */
-  void Go(int squares,unsigned char direction);
+  void Go(float squares,unsigned char direction);
 
   /*
    *Walls:
