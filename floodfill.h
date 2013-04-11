@@ -41,10 +41,6 @@ struct Cell {
    *current best estimate of distance from this cell to the center
    */
   unsigned char distance;
-
-  unsigned char turns;
-  //wasting 4 bits here... can anything be done about that? 
-  unsigned char valid_directions;
 };
 
 class Maze {
@@ -83,13 +79,6 @@ class Maze {
   unsigned char Flood_Fill(unsigned char x,unsigned char y);
 
   /*
-   *Get_Best_Direction:
-   *returns direction of fastest path with least turns visited least option.
-   */
-  unsigned char Get_Best_Direction(unsigned char,unsigned char,unsigned char);
-
-
-  /*
    *Get_Direction:
    *returns the direction of the fastest path to the center from the given cell coordinates
    *returns 0 if the current coordinates are already at the goal
@@ -111,10 +100,6 @@ class Maze {
    */
   unsigned char Update_Distance(unsigned char x, unsigned char y);
 
-  /*
-   *Update_Turns:
-   *updates the best number of turns from a given node
-   */
-  unsigned char Update_Turns(unsigned char x,unsigned char y);
+
 
 };

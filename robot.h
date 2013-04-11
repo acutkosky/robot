@@ -8,13 +8,9 @@
 #include "floodfill.cpp"
 
 
-
-
+#define REVERSE_COMPENSATION 0.2
 #define STEPS_PER_DEGREE 0.96
 #define SQUARE_LENGTH 192.98 //length of a square in steps of the motors.
-
-#define REVERSE_CORRECTION 0.0
-
 
 class Robot {
  public:
