@@ -6,8 +6,8 @@
 
 /*random hard coded constants*/
 #define RIGHT_OPEN_THRESHOLD 180.0
-#define LEFT_OPEN_THRESHOLD 230.0
-#define FORWARD_OPEN_THRESHOLD 260.0
+#define LEFT_OPEN_THRESHOLD 200.0
+#define FORWARD_OPEN_THRESHOLD 300.0
 
 struct DistanceSensor {
   int pin;
@@ -15,7 +15,7 @@ struct DistanceSensor {
   DistanceSensor(int);
   DistanceSensor();
   void calibrate(void);
-  float read(int num=6);
+  float read(int num=4);
   float delay_read(int,int);
   float imbalance(void);
 };

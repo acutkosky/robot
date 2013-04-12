@@ -1,10 +1,12 @@
 #include "driver.h"
 #define SIGN(x) (x<0?-1:1)
-#define k_p 65.0
-
+#define k_p 100.0
+#define k_d 0.1
+#define max_err 1.0
+#define numreadings 3
 /* constructor for DistanceSensor class.
  * takes an analog pin number and immediately calibrates
- */
+ */ 
 DistanceSensor::DistanceSensor(int apin) {
   pin = apin;
   middle_distance=0;
@@ -138,7 +140,7 @@ float Driver::Forward(int steps) {
   
 
   float rs,ls;
-  float accel = 0.5;
+  float accel = 0.004;
 
       digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW;
 
@@ -163,14 +165,14 @@ float Driver::Forward(int steps) {
      */
 
 
-    if(current_speed <target_speed) {
-       current_speed += accel;
-    }
+    //    if(current_speed <target_speed) {
+    current_speed += accel*(target_speed-current_speed);
+      //}
     
     right_speed = left_speed = current_speed;
 
-    rs = right_sensor.read();
-    ls = left_sensor.read();
+    rs = right_sensor.read(numreadings);
+    ls = left_sensor.read(numreadings);
     float err = 0;
     if(rs > RIGHT_OPEN_THRESHOLD) {
       //there is a wall to the right!
@@ -193,13 +195,14 @@ float Driver::Forward(int steps) {
     //float turn = right_speed-left_speed;
     //err -= turn/80;
     //err = 0.0;
-    err = err*SIGN(err)>1.3?1.3*SIGN(err):err;
 
+    err = err*SIGN(err)>max_err?max_err*SIGN(err):err;
+    err*=k_p;
     float D = (err-last_err);
     last_err = err;
 
-    right_speed+=k_p*err-D*0.1;
-    left_speed -=k_p*err+D*0.1;
+    right_speed+=err-D*k_d;
+    left_speed -=err+D*k_d;
 
     //right_speed -= 2*err*SIGN(err);
     //left_speed -= 2*err*SIGN(err);

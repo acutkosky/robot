@@ -121,9 +121,10 @@ void Robot::Go(float squares,unsigned char direction) {
 
 unsigned char Robot::Read_Walls(void) {
   unsigned char walls = 0;
-  float fs = driver.forward_sensor.read(4);
-  float rs = driver.right_sensor.read(4);
-  float ls = driver.left_sensor.read(4);
+  //  delay(10);
+  float fs = driver.forward_sensor.read();
+  float rs = driver.right_sensor.read();
+  float ls = driver.left_sensor.read();
 #ifdef DEBUG
   Serial.print("\n\r");
 #endif
@@ -302,12 +303,7 @@ int Robot::Maze_Step(void) {
   */
   if(direction == 0) {
     //Serial.println("direction = 0!");
-    while(1) {
-      digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-      delay(3000);               // wait for a second
-      digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
-      delay(3000);
-    }
+
     return 0;
   }
 
@@ -365,14 +361,8 @@ int Robot::Maze_Step(void) {
     dely=0;
     delx = -1;
     break;
-  default:
     //oh noes
-    while(1) {
-      digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-      delay(2000);               // wait for a second
-      digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
-      delay(2000);
-    }
+
 
   }
 
