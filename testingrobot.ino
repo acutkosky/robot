@@ -1,4 +1,4 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                                                                                                                                  
 #include "/home/ashok/robot/AccelStepper/AccelStepper.cpp"
 #include "/home/ashok/robot/robot.cpp"
 
@@ -13,10 +13,11 @@ void setup() {
   //driver.SetAvgSpeed(250.0);
   Serial.begin(9600);
   robot.driver.setup();
-  robot.driver.SetAvgSpeed(250.0);
-  
+  robot.driver.SetAvgSpeed(400.0);
+  pinMode(13,OUTPUT);
+   
 }
-
+/*
 void printmaze(void) {
   for(int i=0;i<GRID_SIZE;i++){
     for(int j=0;j<GRID_SIZE;j++) {
@@ -26,47 +27,52 @@ void printmaze(void) {
     Serial.print("\n\r");
   }
 }
-
+*/
 void loop() {
+  Serial.println("whatttttt");
   float reading = sensor.read();
-  Serial.print(robot.driver.left_sensor.read());
+  //while(1) {
+  Serial.print(robot.driver.left_sensor.read(10));
   Serial.print("   ");
-  Serial.print(robot.driver.forward_sensor.middle_distance);
+  Serial.print(robot.driver.right_sensor.read(10));
   Serial.print("   ");
-  Serial.print(robot.driver.forward_sensor.read());
+  Serial.print(robot.driver.forward_sensor.read(10));
   Serial.print("\n\r");
-  robot.maze.Reset_Goal(2,1);
-  robot.Solve();
+  //}
+  //robot.driver.Forward(1000);
+  //while(1);
+  unsigned char not_done = 0;
+  //robot.Go(6,EAST);
+  //while(1);
+  int led =13;
+  digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(1000);               // wait for a second
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(1000);
+  digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(1000);               // wait for a second
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(1000);
+  digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(1000);               // wait for a second
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(1000);
+  //robot.driver.Forward(1000);
+  //while(1);
+  
+  robot.maze.Reset_Goal(4,4);
+  
+  not_done = robot.Solve();
+  
+  while(not_done) {
   robot.maze.Reset_Goal(0,0);
   robot.Solve();
-  robot.maze.Reset_Goal(2,1);
-  robot.Solve();
-  /*
-  robot.Update_Maze();
-  printmaze();
-  Serial.println("done!");
-  robot.Maze_Step();
-  robot.Update_Maze();
-  printmaze();
-  robot.Go(1,EAST);
-  */
-  //robot.Go(3,SOUTH);
-  //robot.Go(3,WEST);
-  //robot.Go(3,NORTH);
-  //robot.Solve();
-  //Advance(1);  //800 ~ 75cm
-  //robot.Advance(1); 
-  //robot.Advance(2); 
-  //robot.Turn(90.0);
-  /*
-  robot.Advance(4);  //800 ~ 75cm
-  robot.Turn(90.0);
-  robot.Advance(4);  //800 ~ 75cm
-  robot.Turn(90.0);
-  robot.Advance(4);  //800 ~ 75cm
-  robot.Turn(90.0);
-  while(1);
-  */
-  while(1);
+  robot.maze.Reset_Goal(4,4);
+  not_done = robot.Solve();
+  }
+  
+  
+
+  //while(1);
   
 }
