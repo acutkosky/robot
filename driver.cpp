@@ -1,9 +1,15 @@
 #include "driver.h"
 #define SIGN(x) (x<0?-1:1)
-#define k_p 150.0
-#define k_d 0.1
-#define max_err 0.9
-#define numreadings 3
+#define k_p 130 //50.0 //150 for 400
+#define k_d 0.1 //0.0  //0.1 fpr 400
+#define max_err 0.9//1.25 //0.9 for 400
+#define numreadings 3 //6 //3 for 400
+
+#define rightclosed (unsigned char)16
+#define leftclosed (unsigned char)8
+
+
+
 /* constructor for DistanceSensor class.
  * takes an analog pin number and immediately calibrates
  */ 
@@ -86,7 +92,10 @@ void Driver::setup(void) {
   //forward_sensor.calibrate();
 
   //Turn(-1000/1040.0*90.0);
-  forward_sensor.middle_distance = 475;
+
+
+  //forward_sensor.middle_distance = 470;
+
 
 }
 
@@ -142,8 +151,10 @@ float Driver::Forward(int steps) {
   float rs,ls;
   float accel = 0.004;
 
-      digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW;
+  digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW;
 
+  unsigned char curstate=0;
+  unsigned char oldstate=0;
 
   //right_speed = left_speed = target_speed;
   //  right_stepper.setMaxSpeed(1000);
@@ -166,7 +177,7 @@ float Driver::Forward(int steps) {
 
 
     //    if(current_speed <target_speed) {
-    current_speed += accel*(target_speed-current_speed);
+    current_speed += 1.0*(target_speed>=current_speed);
       //}
     
     right_speed = left_speed = current_speed;
@@ -174,20 +185,35 @@ float Driver::Forward(int steps) {
     rs = right_sensor.read(numreadings);
     ls = left_sensor.read(numreadings);
     float err = 0;
+    
     if(rs > RIGHT_OPEN_THRESHOLD) {
       //there is a wall to the right!
       err -=  (1.0/(rs)-1.0/right_sensor.middle_distance)*1800;
-
-
-    }
+      if(curstate & rightclosed)
+	curstate ^= rightclosed;
+    } else if(!(curstate &rightclosed))
+      curstate ^= rightclosed;
         
     if(ls> LEFT_OPEN_THRESHOLD) {
       //there is a wall to the left!
       err +=  (1.0/ls-1.0/left_sensor.middle_distance)*1900;
+      if(curstate & leftclosed)
+	curstate ^= leftclosed;
 
+    } else if(!(curstate &leftclosed))
+      curstate ^= leftclosed;
+
+    if(curstate != oldstate) {
+      //we've sensed a square boundary - make sure we go far enough!
+      int distance = steps - (-right_stepper.currentPosition()+left_stepper.currentPosition())/2;
+      if(distance<TRANSITION_RATIO*SQUARE_LENGTH)
+	  steps += (TRANSITION_RATIO*SQUARE_LENGTH-distance);
+      oldstate = curstate;
     }
-    
-    //unsigned long t= micros();
+	 
+
+	
+	 //unsigned long t= micros();
 
     /* we are taking the derivative without time because it worked better*/
 
@@ -210,6 +236,7 @@ float Driver::Forward(int steps) {
     /*random hard coded constants*/
     //right_speed = right_speed-D/400.0;//-turn/295;
     //left_speed = left_speed+D/400.0;//+turn/295;
+
 
     right_stepper.setSpeed(-right_speed);
     left_stepper.setSpeed(left_speed);
@@ -239,4 +266,5 @@ float Driver::Forward(int steps) {
 
   
   
-  
+
+

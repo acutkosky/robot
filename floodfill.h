@@ -59,7 +59,7 @@ class Maze {
    *increment the visit count
    *if observed walls are not equal to previously guessed walls, update walls
    */
-  void Visit(unsigned char x, unsigned char y,unsigned char Walls);
+  unsigned char Visit(unsigned char x, unsigned char y,unsigned char Walls);
 
   /*
    *Add_Walls:
@@ -69,7 +69,7 @@ class Maze {
    *wall = OR of walls to add in (e.g. walls = NORTH|SOUTH will add two walls).
    *will also add the other side of the walls from the adjacent cells.
    */
-  void Add_Walls(unsigned char x, unsigned char y, unsigned char wall);
+  unsigned char Add_Walls(unsigned char x, unsigned char y, unsigned char wall);
 
   /*
    *Flood_Fill:

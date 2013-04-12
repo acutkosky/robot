@@ -72,7 +72,7 @@ unsigned char Maze::Update_Distance(unsigned char x, unsigned char y) {
     return 1;
   }
   
-  unsigned char best_distance = 127;
+  unsigned char best_distance = 255;
   unsigned char walls = grid[x][y].walls_visits;
   //  cout<<"x: "<<(int)x<<"y: "<<(int)y<<"\n";  
   if(!NORTH_WALL(walls)) {
@@ -165,7 +165,7 @@ unsigned char Maze::Get_Direction(unsigned char x, unsigned char y) {
   return best_direction;
 }
 
-void Maze::Visit(unsigned char x,unsigned char y, unsigned char walls) {
+unsigned char Maze::Visit(unsigned char x,unsigned char y, unsigned char walls) {
 
   /*
    *increment visit count.
@@ -173,13 +173,15 @@ void Maze::Visit(unsigned char x,unsigned char y, unsigned char walls) {
    */
   if(VISITS(grid[x][y].walls_visits)<15)
     grid[x][y].walls_visits++;
-
+  unsigned char ret = 0;
   if(WALLS(grid[x][y].walls_visits)!=walls)
-    Add_Walls(x,y,walls);
+    ret = Add_Walls(x,y,walls);
+  return ret;
 }
   
 
-void Maze::Add_Walls(unsigned char x, unsigned char y, unsigned char wall) {
+unsigned char Maze::Add_Walls(unsigned char x, unsigned char y, unsigned char wall) {
+  unsigned char ret = (wall != WALLS(grid[x][y].walls_visits));
   ADD_WALL(grid[x][y].walls_visits,wall);
 
 
@@ -196,7 +198,7 @@ void Maze::Add_Walls(unsigned char x, unsigned char y, unsigned char wall) {
 
   if(WEST_WALL(wall) && x>0) 
     ADD_WALL(grid[x-1][y].walls_visits,EAST);
-
+  return ret;
 }
 
 

@@ -195,9 +195,82 @@ unsigned char Robot::Walls(void) {
 }
 
 unsigned char Robot::Update_Maze(void) {
-  unsigned char cur_walls = Walls();
+  unsigned char cur_walls = 0;//Walls();
   unsigned char visits = VISITS(maze.grid[x][y].walls_visits);
   unsigned char ret;
+
+  float rs = driver.right_sensor.read();
+  float ls = driver.left_sensor.read();
+  float fs = driver.forward_sensor.read();
+ 
+  char leftoffsetx, leftoffsety;
+
+  unsigned char changed_maze = 0;
+
+  switch(orientation) {
+  case NORTH:
+    leftoffsetx = -1;
+    leftoffsety = 0;
+    break;
+  case SOUTH:
+    leftoffsetx = 1;
+    leftoffsety = 0;
+    break;
+  case EAST:
+    leftoffsetx = 0;
+    leftoffsety = -1;
+    break;
+  case WEST:
+    leftoffsetx = 0;
+    leftoffsety = 1;
+    break;
+  }
+
+
+  if(fs > FORWARD_FAR_THRESHOLD) {
+    if(fs>FORWARD_OPEN_THRESHOLD) {
+      cur_walls |= orientation;
+    } else {
+      changed_maze |= maze.Add_Walls(x-leftoffsety,y+leftoffsetx,orientation);
+    }
+  }
+
+  if(rs > RIGHT_FAR_THRESHOLD) {
+    if(rs >RIGHT_OPEN_THRESHOLD) {
+      if(orientation == WEST) {
+	cur_walls |= NORTH;
+      } else {
+	cur_walls |= (orientation >> 1);
+      }
+    } else {
+
+      //wall two to the right!
+
+      if(orientation == WEST) {
+	changed_maze |= maze.Add_Walls(x-leftoffsetx,y-leftoffsety,NORTH);
+      } else {
+	changed_maze |= maze.Add_Walls(x-leftoffsetx,y-leftoffsety,(orientation >> 1));
+      }
+    }
+  }
+  
+
+  if(ls > LEFT_FAR_THRESHOLD) {
+    if(ls >LEFT_OPEN_THRESHOLD) {
+      if(orientation == NORTH) {
+	cur_walls |= WEST;
+      } else {
+	cur_walls |= (orientation << 1);
+      }
+    } else {
+      //wall two to the left!
+      if(orientation == NORTH) {
+	changed_maze |= maze.Add_Walls(x+leftoffsetx,y+leftoffsety,WEST);
+      } else {
+	changed_maze |= maze.Add_Walls(x+leftoffsetx,y+leftoffsety,(orientation << 1));
+      }
+    }
+  }
 
   //are we in a corridor?
   switch(orientation) {
@@ -214,7 +287,7 @@ unsigned char Robot::Update_Maze(void) {
     explored_new = 1;
     }
 
-  maze.Visit(x,y,cur_walls);
+  changed_maze |= maze.Visit(x,y,cur_walls);
   //printwalls(cur_walls);
   //we only want to floodfill if we're about to turn
 
@@ -283,8 +356,8 @@ int Robot::Maze_Step(void) {
       direction = orientation;
     } else {
       //Serial.println("floodfilling!");
-      driver.current_speed = 0;
       maze.Flood_Fill(x,y);
+      driver.current_speed = 0;
       direction = Best_Direction();
     }
   } else {

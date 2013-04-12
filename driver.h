@@ -7,8 +7,17 @@
 /*random hard coded constants*/
 #define RIGHT_OPEN_THRESHOLD 180.0
 #define LEFT_OPEN_THRESHOLD 200.0
-#define FORWARD_OPEN_THRESHOLD 300.0
+#define FORWARD_OPEN_THRESHOLD 290.0
 
+#define RIGHT_FAR_THRESHOLD 50.0
+#define LEFT_FAR_THRESHOLD 120.0
+#define FORWARD_FAR_THRESHOLD 70.0
+
+#define REVERSE_COMPENSATION 0.1
+#define STEPS_PER_DEGREE 0.96
+#define SQUARE_LENGTH 192.98 //length of a square in steps of the motors.
+
+#define TRANSITION_RATIO 0.5
 
 struct DistanceSensor {
   int pin;
