@@ -1,8 +1,8 @@
 #include "driver.h"
 #define SIGN(x) (x<0?-1:1)
-#define k_p 100.0
+#define k_p 150.0
 #define k_d 0.1
-#define max_err 1.0
+#define max_err 0.9
 #define numreadings 3
 /* constructor for DistanceSensor class.
  * takes an analog pin number and immediately calibrates
@@ -197,7 +197,7 @@ float Driver::Forward(int steps) {
     //err = 0.0;
 
     err = err*SIGN(err)>max_err?max_err*SIGN(err):err;
-    err*=k_p;
+    err*=k_p*(current_speed/target_speed)*(current_speed/target_speed);
     float D = (err-last_err);
     last_err = err;
 
