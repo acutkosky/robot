@@ -1,8 +1,8 @@
 #include "driver.h"
 #define SIGN(x) (x<0?-1:1)
-#define k_p 130 //50.0 //150 for 400
-#define k_d 0.1 //0.0  //0.1 fpr 400
-#define max_err 0.9//1.25 //0.9 for 400
+#define k_p 140 //50.0 //150 for 400
+#define k_d 0.0 //0.0  //0.1 fpr 400
+#define max_err 0.8//1.25 //0.9 for 400
 #define numreadings 3 //6 //3 for 400
 
 #define rightclosed (unsigned char)16
@@ -94,7 +94,7 @@ void Driver::setup(void) {
   //Turn(-1000/1040.0*90.0);
 
 
-  //forward_sensor.middle_distance = 470;
+  forward_sensor.middle_distance = 470;
 
 
 }
@@ -168,7 +168,11 @@ float Driver::Forward(int steps) {
   //right_speed = left_speed = current_speed;
   //right_stepper.setSpeed(-right_speed);
   //left_stepper.setSpeed(left_speed);
+  int right_steps = 0;
+  int left_steps = 0;
   while((-right_stepper.currentPosition()+left_stepper.currentPosition())<(2*steps) && forward_sensor.read() < forward_sensor.middle_distance) {
+    // while((right_steps+left_steps)<(2*steps) && forward_sensor.read() < forward_sensor.middle_distance) {
+
     /* three cases:
      * we are in a hallway (easiest, can use both sensors)
      * in a T junction (just use on sensor)
@@ -238,8 +242,8 @@ float Driver::Forward(int steps) {
     //left_speed = left_speed+D/400.0;//+turn/295;
 
 
-    right_stepper.setSpeed(-right_speed);
-    left_stepper.setSpeed(left_speed);
+       right_stepper.setSpeed(-right_speed);
+        left_stepper.setSpeed(left_speed);
 
     /*
     Serial.println("true rs,ls,err");
@@ -247,16 +251,34 @@ float Driver::Forward(int steps) {
     Serial.println(left_stepper.speed());
     Serial.println(err);
     */
-    int rstep = right_stepper.runSpeed();
-    int lstep = left_stepper.runSpeed();
+	/*
+     	if(err>20) {
+	  right_stepper.step(0);
+	} 
+	if(err<-20) {
+	  left_stepper.step(0);
+	}
+	right_stepper.step(0);
+	left_stepper.step(0);
+	right_steps++;
+	left_steps++;
+	/*
+
     /*
     Serial.println("rstep, lstep");
     Serial.println(rstep);
     Serial.println(lstep);
     */
+    int rstep = right_stepper.runSpeed();
+    int lstep = left_stepper.runSpeed();
   }
-  //delay(1000);
+    /*
+  delay(2000);
       digitalWrite(13, HIGH);    // turn the LED off by making the voltage LOW
+      delay(2000);
+      digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+      digitalWrite(13, HIGH);    // turn the LED off by making the voltage LOW
+    */
   return (-right_stepper.currentPosition()+left_stepper.currentPosition())/2.0;
 
 }
