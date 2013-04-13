@@ -26,11 +26,11 @@ void wait_for_encoder(){
   while(waitingforencoder < 3){
 
  int numPresses = 0;
-    tmpdata = read_encoder();
+ /*  tmpdata = read_encoder();
     if( tmpdata ) {
       counter += tmpdata;
     }
-    if(!digitalRead(encoderSwitchPin)){
+ */  if(!digitalRead(encoderSwitchPin)){
       while(!digitalRead(encoderSwitchPin)){
       }
       delay(300);
@@ -67,10 +67,13 @@ void wait_for_encoder(){
 
 unsigned int read_encoder()
 {
-  static unsigned int enc_states[] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
-  static unsigned int old_AB = 0;
-  /**/
-  old_AB <<= 2;                   //remember previous state
-  old_AB |= ( ENC_PORT & 0x03 );  //add current state
-  return ( enc_states[( old_AB & 0x0f )]);
+  while(digitalRead(encoderSwitchPin)){
+    static unsigned int enc_states[] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
+    static unsigned int old_AB = 0;
+    /**/
+    old_AB <<= 2;                   //remember previous state
+    old_AB |= ( ENC_PORT & 0x03 );  //add current state
+    counter += ( enc_states[( old_AB & 0x0f )]);
+  }
+  return counter;
 }
