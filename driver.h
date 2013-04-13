@@ -14,7 +14,7 @@
 #define FORWARD_FAR_THRESHOLD 70.0
 
 #define REVERSE_COMPENSATION 0.1
-float STEPS_PER_DEGREE = 1.0;
+float STEPS_PER_DEGREE = 1.01;
 float SQUARE_LENGTH = 192.98; //length of a square in steps of the motors.
 
 #define TRANSITION_RATIO 0.5
@@ -56,6 +56,7 @@ class Driver {
   Driver(int rs_pin=2,int ls_pin=1, int fs_pin=0, int rd_pin=2,
 	 int rm_pin=3, int ld_pin =4, int lm_pin =5);
 
+  float Calibrate_Turn(void);
 
   void setup(void);
 

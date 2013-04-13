@@ -1,9 +1,9 @@
 #include "driver.h"
 #define SIGN(x) (x<0?-1:1)
-#define k_p 50.0//140 //50.0 //150 for 400
+#define k_p 130//53.0//140 //50.0 //150 for 400
 #define k_d 0.0 //0.0  //0.1 fpr 400
-#define max_err 1.3//0.8//1.25 //0.9 for 400
-#define numreadings 6//3 //6 //3 for 400
+#define max_err 1.2//1.27//0.8//1.25 //0.9 for 400
+#define numreadings 5//3 //6 //3 for 400
 
 #define rightclosed (unsigned char)16
 #define leftclosed (unsigned char)8
@@ -22,7 +22,7 @@ DistanceSensor::DistanceSensor(int apin) {
 void DistanceSensor::calibrate(void) {
   float volts = 0.0;
   for(int i=0;i<100;i++) {
-    volts += delay_read(2,5);
+    volts += delay_read(3,10);
     //delay(10);
   }
   middle_distance = volts/100.0;
@@ -71,6 +71,10 @@ Driver::Driver(int rs_pin,int ls_pin, int fs_pin, int rd_pin,
 
 void Driver::setup(void) {
 
+  pinMode(13,OUTPUT);
+
+  digitalWrite(13,HIGH);
+
   right_sensor.calibrate();
   left_sensor.calibrate();
 
@@ -97,8 +101,45 @@ void Driver::setup(void) {
   //forward_sensor.middle_distance = 480;
 
 
+  //ok, let's try to calibrate a 360 degree turnnn
+
+  //Turn(360* STEPS_PER_DEGREE);
+  
+  //float adjust = Calibrate_Turn();
+
+  //STEPS_PER_DEGREE = (360*STEPS_PER_DEGREE+adjust)/360.0;
+
+  digitalWrite(13,LOW);
 }
 
+
+float Driver::Calibrate_Turn(void) {
+  
+  float adjust = 0;
+
+  float step_size = -10*STEPS_PER_DEGREE;
+
+  float fs = forward_sensor.delay_read(10,100);
+
+  Turn(step_size);
+  adjust = step_size;
+
+  float newfs = forward_sensor.delay_read(10,100);
+
+  while(SIGN(step_size)*step_size>STEPS_PER_DEGREE/2.0) {
+    if(newfs < fs) {
+      step_size *= -0.5;
+    }
+    fs = newfs;
+    Turn(step_size);
+    adjust += step_size;
+    newfs = forward_sensor.delay_read(10,100);
+  }
+
+  return adjust;
+}
+
+  
 
 void SetTurn(AccelStepper& stepper1,AccelStepper& stepper2,int steps) {
   stepper1.stop();
