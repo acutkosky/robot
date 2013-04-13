@@ -13,7 +13,7 @@ void setup() {
   //driver.SetAvgSpeed(250.0);
   Serial.begin(9600);
   robot.driver.setup();
-  robot.driver.SetAvgSpeed(400.0);
+  robot.driver.SetAvgSpeed(250.0);
   pinMode(13,OUTPUT);
    
 }
@@ -31,20 +31,22 @@ void printmaze(void) {
 void loop() {
   Serial.println("whatttttt");
   float reading = sensor.read();
-  //while(1) {
+  while(1) {
   Serial.print(robot.driver.left_sensor.read(10));
   Serial.print("   ");
   Serial.print(robot.driver.right_sensor.read(10));
   Serial.print("   ");
   Serial.print(robot.driver.forward_sensor.read(10));
   Serial.print("\n\r");
-  //}
+  delay(10);
+  }
   //robot.driver.Forward(1000);
   //while(1);
   unsigned char not_done = 0;
   //robot.Go(6,EAST);
   //while(1);
   int led =13;
+  /*
   digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
   delay(1000);               // wait for a second
   digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
@@ -57,9 +59,13 @@ void loop() {
   delay(1000);               // wait for a second
   digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);
+  */
   //robot.driver.Forward(1000);
   //while(1);
   
+  //robot.driver.Turn(200);
+  //robot.driver.Forward(400);
+  //while(1);
   robot.maze.Reset_Goal(4,4);
   
   not_done = robot.Solve();
