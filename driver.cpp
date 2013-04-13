@@ -1,9 +1,9 @@
 #include "driver.h"
 #define SIGN(x) (x<0?-1:1)
-#define k_p 140 //50.0 //150 for 400
+#define k_p 50.0//140 //50.0 //150 for 400
 #define k_d 0.0 //0.0  //0.1 fpr 400
-#define max_err 0.8//1.25 //0.9 for 400
-#define numreadings 3 //6 //3 for 400
+#define max_err 1.3//0.8//1.25 //0.9 for 400
+#define numreadings 6//3 //6 //3 for 400
 
 #define rightclosed (unsigned char)16
 #define leftclosed (unsigned char)8
@@ -78,12 +78,12 @@ void Driver::setup(void) {
 
   right_stepper.stop();
   left_stepper.stop();
-  right_stepper.setSpeed(-1000.0);
-  right_stepper.setAcceleration(1000.0);
-  right_stepper.setMaxSpeed(1000.0);
-  left_stepper.setSpeed(1000.0);
-  left_stepper.setAcceleration(1000.0);
-  left_stepper.setMaxSpeed(1000.0);
+  right_stepper.setSpeed(-500.0);
+  right_stepper.setAcceleration(500.0);
+  right_stepper.setMaxSpeed(500.0);
+  left_stepper.setSpeed(500.0);
+  left_stepper.setAcceleration(500.0);
+  left_stepper.setMaxSpeed(500.0);
   last_err = 0.0;
   last_time = micros();
   current_speed = 0;
@@ -93,8 +93,8 @@ void Driver::setup(void) {
 
   //Turn(-1000/1040.0*90.0);
 
-
-  forward_sensor.middle_distance = 470;
+  forward_sensor.calibrate();
+  //forward_sensor.middle_distance = 480;
 
 
 }

@@ -1,6 +1,6 @@
 
 #include "robot.h"
-/*
+
 void printwalls(unsigned char walls) {
   if(NORTH_WALL(walls))
     Serial.println("North");
@@ -11,10 +11,10 @@ void printwalls(unsigned char walls) {
   if(WEST_WALL(walls))
     Serial.println("West");
 }
-*/
+
 Robot::Robot(void) {
   driver = Driver();
-  orientation = EAST;
+  orientation = WEST;
   x = y = 0;
   explored_new = 0;
 }
@@ -295,17 +295,17 @@ unsigned char Robot::Update_Maze(void) {
 
 }
 
-/*
+
 void printmaze(Maze& maze) {
-  for(int i=0;i<5;i++){
-    for(int j=0;j<5;j++) {
+  for(int i=0;i<6;i++){
+    for(int j=0;j<6;j++) {
       Serial.print((uint)maze.grid[j][i].distance);
       Serial.print(" ");
     }
     Serial.print("\n\r");
   }
 }
-*/
+
 unsigned char Robot::Best_Direction(void) {
   unsigned char target_distance = maze.grid[x][y].distance;
   if(target_distance == 0) {
@@ -343,8 +343,12 @@ int Robot::Maze_Step(void) {
   //if we are in a corridor then go straight. otherwise floodfill.
   unsigned char corridor = Update_Maze();  
   unsigned char visits = VISITS(maze.grid[x][y].walls_visits);
-
-
+  /*
+  Serial.println("printing the walls at position:");
+  Serial.println((int)x);
+  Serial.println((int)y);
+  printwalls(WALLS(maze.grid[x][y].walls_visits));
+  */
 
   unsigned char direction;
 
@@ -364,8 +368,11 @@ int Robot::Maze_Step(void) {
     direction = Best_Direction();
     //Serial.println("visited square!");
   }
-  //printmaze(maze);
-    
+  /*
+  driver.current_speed = 0;
+  Serial.println("Maze layout: ");
+  printmaze(maze);
+  */
 
 
   /*

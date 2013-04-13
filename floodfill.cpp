@@ -175,7 +175,7 @@ unsigned char Maze::Visit(unsigned char x,unsigned char y, unsigned char walls) 
     grid[x][y].walls_visits++;
   unsigned char ret = 0;
   if(WALLS(grid[x][y].walls_visits)!=walls)
-    ret = Add_Walls(x,y,walls);
+    ret = Set_Walls(x,y,walls);
   return ret;
 }
   
@@ -199,6 +199,45 @@ unsigned char Maze::Add_Walls(unsigned char x, unsigned char y, unsigned char wa
   if(WEST_WALL(wall) && x>0) 
     ADD_WALL(grid[x-1][y].walls_visits,EAST);
   return ret;
+}
+
+unsigned char Maze::Set_Walls(unsigned char x, unsigned char y, unsigned char wall) {
+  unsigned char ret = (wall != WALLS(grid[x][y].walls_visits));
+  unsigned char visits = VISITS(grid[x][y].walls_visits);
+  unsigned char oldwalls = grid[x][y].walls_visits;
+  if(ret) {    
+  /*add in the other sides of the walls*/
+    if(NORTH_WALL(wall)) {
+      if(y>0)
+	ADD_WALL(grid[x][y-1].walls_visits,SOUTH);
+    } else if(NORTH_WALL(oldwalls) && y>0) {
+      grid[x][y-1].walls_visits ^= SOUTH;
+    }
+      
+
+    if(SOUTH_WALL(wall)) {
+      if(y<GRID_SIZE-1)
+	ADD_WALL(grid[x][y+1].walls_visits,NORTH);
+    } else if(SOUTH_WALL(oldwalls) && y<GRID_SIZE-1) {
+      grid[x][y+1].walls_visits ^= NORTH;
+    }
+
+    if(EAST_WALL(wall)) {
+      if(x<GRID_SIZE-1)
+	ADD_WALL(grid[x+1][y].walls_visits,WEST);
+    } else if(EAST_WALL(oldwalls) && x< GRID_SIZE-1) {
+      grid[x+1][y].walls_visits ^= WEST;
+    }
+
+    if(WEST_WALL(wall)) {
+      if(x>0)
+	ADD_WALL(grid[x-1][y].walls_visits,EAST);
+    } else if (WEST_WALL(oldwalls) && x>0) {
+      grid[x-1][y].walls_visits ^= EAST;
+    }
+
+  }
+    grid[x][y].walls_visits = visits|wall;
 }
 
 

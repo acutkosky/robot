@@ -101,5 +101,6 @@ class Maze {
   unsigned char Update_Distance(unsigned char x, unsigned char y);
 
 
+  unsigned char Set_Walls(unsigned char x, unsigned char y,unsigned char wall);
 
 };
