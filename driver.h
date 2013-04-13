@@ -14,8 +14,8 @@
 #define FORWARD_FAR_THRESHOLD 70.0
 
 #define REVERSE_COMPENSATION 0.1
-float STEPS_PER_DEGREE 1.0
-float SQUARE_LENGTH 192.98 //length of a square in steps of the motors.
+float STEPS_PER_DEGREE = 1.0;
+float SQUARE_LENGTH = 192.98; //length of a square in steps of the motors.
 
 #define TRANSITION_RATIO 0.5
 
